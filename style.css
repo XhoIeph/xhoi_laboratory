@@ -21,6 +21,7 @@ h1{
     width: 1573px;
     height: 977px;
     text-indent: -9999px;
+    z-index: 0; /* ensure logo background sits behind interactive controls */
 }
 header ul{
     position: absolute;
@@ -83,19 +84,69 @@ footer a:hover{
     text-decoration: underline;
 }
 .menu{
-    display: none;
+    /* Visible on desktop by default; mobile override below
+       Provides a subtle rounded background that appears on hover and
+       a press animation on active. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    position: relative;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 160ms ease, background-color 160ms ease;
+    z-index: 1001; /* ensure button sits above the huge h1 background */
+}
+
+/* decorative rounded block that 'pops out' on hover */
+.menu::before{
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 180ms cubic-bezier(.2,.8,.2,1), opacity 180ms ease;
+    z-index: -1;
+}
+.menu:hover::before{
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* pressed state for mouse/touch feedback */
+.menu.pressed{
+    transform: translateY(1px) scale(0.98);
 }
 /*响应式设计专用*/
 @media screen and (max-width: 768px) {
+    /* keep the nav in the DOM on mobile but visually hide it with opacity/pointer-events
+       so we can animate it via transitions and keep it accessible for screen readers */
     header ul{
-        display: none;
+        display: block;
+        position: absolute;
+        top: 100%;
+        right: 6vw;
+        background-color: rgba(0,0,0,0.9);
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+        z-index: 50;
+        opacity: 0;
+        transform: translateY(-8px) scale(0.98);
+        pointer-events: none;
+        transition: opacity 220ms ease, transform 220ms ease;
     }
     header h1{
         left: 50%;
         transform: translateX(-50%);
         transform: scale(0.15) translate(-330%,-298%);
     }
-        .menu{
+    .menu{
         display: block;
         background-color: transparent;
         color: white;
@@ -106,4 +157,154 @@ footer a:hover{
         border: none;
         cursor: pointer;
     }
+
+    /* When header has nav-open, animate to visible */
+    header.nav-open ul{
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+    }
+
+    header.nav-open li{
+        display: block;
+        margin: 0.5rem 0;
+    }
+
+    header.nav-open a{
+        color: whitesmoke;
+        font-size: 1.1rem;
+    }
+}
+
+/* header scrolled state */
+header.scrolled{
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    background-color: rgba(0,0,0,0.95);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    header ul,
+    header.nav-open ul {
+        transition: none !important;
+    }
+}
+
+/* --- Animations & button styles --- */
+.menu{
+    /* make the hamburger visually nicer */
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border-radius: 6px;
+    transition: transform 220ms ease, background-color 160ms ease;
+    z-index: 1001;
+}
+.menu:focus{
+    outline: 2px solid #fff7;
+    outline-offset: 2px;
+}
+
+/* rotation/scale feedback when open */
+header.nav-open .menu{
+    transform: rotate(90deg) scale(1.02);
+}
+
+/* Nav list items animate individually; default uses CSS variable --delay set by JS */
+header ul li{
+    opacity: 0;
+    transform: translateY(-6px) scale(0.995);
+    transition: opacity 260ms cubic-bezier(.2,.8,.2,1) var(--delay,0ms),
+                transform 260ms cubic-bezier(.2,.8,.2,1) var(--delay,0ms);
+}
+
+header.nav-open ul li{
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* Link hover / focus micro-interactions */
+header a{
+    transition: color 160ms ease, transform 140ms ease;
+}
+header a:hover,
+header a:focus{
+    transform: translateY(-2px);
+    color: #ffdede;
+}
+
+/* Slight staggered underline on hover (desktop) */
+@media (min-width: 769px){
+    header ul li a{
+        position: relative;
+    }
+    header ul li a::after{
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -6px;
+        height: 2px;
+        width: 0;
+        background: rgba(255,255,255,0.85);
+        transition: width 220ms ease;
+    }
+    header ul li a:hover::after,
+    header ul li a:focus::after{
+        width: 100%;
+    }
+}
+
+/* Desktop specific: hide hamburger, show inline nav on the right */
+@media (min-width: 769px) {
+    .menu {
+        display: none !important; /* hide left hamburger on desktop */
+    }
+    header ul {
+        display: flex !important;
+        position: absolute;
+        right: 6vw;
+        top: 0;
+        align-items: center;
+        gap: 2.5vw;
+        line-height: 100px;
+        font-size: larger;
+        opacity: 1 !important;
+        transform: none !important;
+        pointer-events: auto !important;
+        background: transparent !important;
+        padding: 0;
+    }
+    header ul li{
+        display: inline-block;
+        margin: 0;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+    header a{
+        color: whitesmoke;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .menu,
+    header ul li,
+    header ul li a::after {
+        transition: none !important;
+    }
+}
+
+/* Ensure the hamburger character is visible and positioned above the big logo
+   Put an explicit color, size and absolute positioning so the button is visible */
+header .menu {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    color: whitesmoke;
+    font-size: 22px;
+    line-height: 1;
+    z-index: 1001;
 }
