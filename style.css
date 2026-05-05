@@ -1109,8 +1109,8 @@ header.nav-open #main-nav {
   .data-tag.top-right-tag { right: 60px; font-size: 0.45rem; }
 
   /* Mobile: shrink watermark */
-  .bg-watermark { width: 95vw; height: 40vh; opacity: 0.12; }
-  .bg-rings-wrapper { opacity: 0.08; }
+  .bg-watermark { width: 95vw; height: 50vh; opacity: 0.22; }
+  .bg-rings-wrapper { opacity: 0.14; }
   .bg-particles { display: none; }
 
   /* Mobile: waveform canvas fit */
@@ -1118,8 +1118,8 @@ header.nav-open #main-nav {
   .telem-ticker { display: none; }
 
   /* Mobile: slide adjustments */
-  .slide-links { padding: 20px 12px; }
-  .friends-grid { grid-template-columns: 1fr; gap: 10px; max-width: 100%; }
+  .slide-links { padding: 20px 12px; justify-content: flex-start; overflow-y: auto; }
+  .friends-grid { grid-template-columns: 1fr; gap: 10px; max-width: 100%; padding-bottom: 60px; }
   .friend-card { padding: 16px 18px; gap: 12px; }
   .friend-avatar { width: 56px; height: 56px; font-size: 22px; }
   .friend-name { font-size: 0.9rem; }
