@@ -37,6 +37,13 @@ html.light {
   --scan-alpha: 0.01;
 }
 
+/* ========== Chinese pixel font (Zpix) ========== */
+@font-face {
+  font-family: 'Zpix';
+  src: url('https://cdn.jsdelivr.net/npm/zpix@3.1.0/dist/Zpix.woff2') format('woff2');
+  font-display: swap;
+}
+
 /* ========== Reset ========== */
 *, *::before, *::after {
   margin: 0;
@@ -142,6 +149,54 @@ html.light .bg-watermark { opacity: 0.15; }
 /* Serial planet ring: replaced by Canvas 2D for performance */
 #serial-ring {
   display: none;
+}
+
+/* ===== Line draw-in animation (triggered after pop-in) ===== */
+.bg-watermark .line-draw {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  animation: line-draw-in 1.6s cubic-bezier(0.16, 1, 0.3, 1) var(--draw-delay, 1.3s) forwards;
+}
+@keyframes line-draw-in {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ===== Node pulse: quantum blinking LEDs ===== */
+.bg-watermark .node-pulse {
+  will-change: opacity;
+  animation: node-blink var(--pulse-duration, 2.5s) ease-in-out var(--pulse-delay, 0s) infinite;
+}
+@keyframes node-blink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* Glow boost for proximity (JS sets filter inline) */
+.bg-watermark .node-glow {
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+/* ===== Edge flash: JS-driven pulse (no CSS animation) ===== */
+.edge-overlay line {
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity, filter, stroke-width;
+}
+
+/* ===== Ripple ring on mouse proximity ===== */
+.ripple-ring {
+  fill: none;
+  stroke: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  will-change: r, opacity, stroke-width;
+}
+.ripple-ring.fire {
+  animation: ripple-out 0.75s ease-out forwards;
+}
+@keyframes ripple-out {
+  0%   { r: 4; opacity: 0.75; stroke-width: 2.5; }
+  100% { r: 35; opacity: 0; stroke-width: 0.3; }
 }
 
 /* Canvas ring system — 8 independent layers for diff-rotation + 3D perspective */
@@ -292,11 +347,12 @@ header {
   z-index: 1002;
 }
 
-/* Large geometric diamond logo */
+/* Large geometric hex logo — matches background center emblem */
 .header-logo-icon {
-  color: var(--dim);
+  color: var(--text);
   flex-shrink: 0;
   opacity: 1;
+  filter: drop-shadow(0 0 1px currentColor);
 }
 
 /* Two-line title block */
@@ -307,7 +363,7 @@ header {
 }
 
 .header-title-zh {
-  font-family: '霞鹜文楷', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  font-family: 'Zpix', '霞鹜文楷', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: var(--text);
@@ -502,15 +558,13 @@ header {
 }
 
 /* ========== Navigation ========== */
-header li {
+#main-nav > li {
   color: var(--text);
   display: inline-block;
   margin: 0;
-  opacity: 1 !important;
-  transform: none !important;
 }
 
-header a {
+#main-nav a {
   color: var(--text);
   text-decoration: none;
   font-size: 0.7rem;
@@ -520,13 +574,13 @@ header a {
   transition: border-color 80ms ease, background-color 80ms ease, color 80ms ease;
 }
 
-header a:hover {
+#main-nav a:hover {
   border-color: currentColor;
   text-decoration: none;
   transform: none;
 }
 
-header a.nav-social-active {
+#main-nav a.nav-social-active {
   color: var(--accent);
   border-color: var(--accent);
 }
@@ -614,6 +668,7 @@ header.nav-open .menu { transform: rotate(90deg); }
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif;
   font-size: 0.55rem;
   letter-spacing: 0.06em;
   color: var(--dim);
@@ -694,6 +749,7 @@ header.nav-open .menu { transform: rotate(90deg); }
 .myself h2::after  { content: ' ]'; color: var(--accent); opacity: 0.5; font-weight: 300; }
 
 .myself h3 {
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif;
   font-size: clamp(20px, 2.5vw, 60px);
   font-weight: 400;
   margin: 20px 0;
@@ -726,6 +782,7 @@ header.nav-open .menu { transform: rotate(90deg); }
 }
 
 .slide-section-title {
+  font-family: 'Zpix', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--text);
@@ -954,7 +1011,7 @@ header.nav-open .menu { transform: rotate(90deg); }
 /* ============================================================
    MOBILE NAV
    ============================================================ */
-header.nav-open ul {
+header.nav-open #main-nav {
   opacity: 1 !important;
   transform: translateY(0) !important;
   pointer-events: auto !important;
@@ -996,7 +1053,7 @@ header.nav-open ul {
     text-align: left;
   }
 
-  header ul {
+  #main-nav {
     display: flex !important;
     flex-direction: column;
     position: absolute;
@@ -1014,7 +1071,7 @@ header.nav-open ul {
     gap: 0;
   }
 
-  header ul li {
+  #main-nav > li {
     display: block;
     margin: 0;
     padding: 0;
@@ -1023,13 +1080,13 @@ header.nav-open ul {
     transition: none !important;
   }
 
-  header a {
+  #main-nav a {
     display: block;
     padding: 8px 12px;
     font-size: 0.8rem;
   }
 
-  header.nav-open ul {
+  header.nav-open #main-nav {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
@@ -1070,6 +1127,18 @@ header.nav-open ul {
   .works-grid { grid-template-columns: 1fr; }
   .slide-section-title { font-size: 1.2rem; margin-bottom: 20px; }
   .slide-addr-tag { bottom: 30px; font-size: 0.5rem; }
+
+  /* Mobile: toolbox dropdown overrides */
+  .toolbox-dropdown { min-width: 150px; right: auto; left: 0; }
+  .toolbox-dropdown a { padding: 10px 14px; font-size: 0.7rem; }
+
+  /* Mobile: slider text sizing */
+  .myself h2 { font-size: clamp(24px, 6vw, 40px); }
+  .myself h3 { font-size: clamp(16px, 3.5vw, 24px); }
+  .myself p  { font-size: clamp(10px, 2vw, 14px); }
+
+  /* Mobile: nav links more tappable */
+  #main-nav a { padding: 10px 14px; font-size: 0.85rem; }
 }
 
 /* ============================================================
@@ -1078,7 +1147,7 @@ header.nav-open ul {
 @media (min-width: 769px) {
   .menu { display: none !important; }
 
-  header ul {
+  #main-nav {
     display: flex !important;
     flex-direction: row;
     position: static;
@@ -1095,7 +1164,7 @@ header.nav-open ul {
     letter-spacing: 0.08em;
   }
 
-  header ul li {
+  #main-nav > li {
     display: inline-block;
     margin: 0;
     opacity: 1 !important;
@@ -1116,8 +1185,8 @@ header.scrolled {
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
   .slider-track, .slider-dot, .slider-btn,
-  header ul, header.nav-open ul, .menu,
-  header ul li,
+  #main-nav, header.nav-open #main-nav, .menu,
+  #main-nav > li,
   body, header {
     transition: none !important;
   }
@@ -1130,6 +1199,10 @@ header.scrolled {
   .welcome-anim-delay { animation: none !important; opacity: 1 !important; clip-path: none !important; }
   .avatar-frame::after { animation: none !important; display: none; }
   .bg-watermark svg { animation: none !important; }
+  .line-draw { animation: none !important; stroke-dashoffset: 0 !important; }
+  .node-pulse { animation: none !important; }
+  .edge-overlay line { display: none; }
+  .ripple-ring { animation: none !important; display: none; }
 }
 
 /* ============================================================
@@ -1219,43 +1292,40 @@ header.scrolled {
   transition: background-color 80ms ease, color 80ms ease;
   white-space: nowrap;
 }
-.toolbox-btn:hover {
-  background-color: var(--text);
-  color: var(--bg);
+@media (hover: hover) {
+  .toolbox-btn:hover {
+    background-color: var(--text);
+    color: var(--bg);
+  }
 }
 
 .toolbox-dropdown {
-  visibility: hidden !important;
   opacity: 0;
   position: absolute;
   top: 100%;
   right: 0;
   margin-top: 4px;
-  background: var(--bg) !important;
+  background: var(--bg);
   border: 1px solid var(--border);
   list-style: none;
   padding: 6px 0;
-  min-width: 220px;
+  min-width: 160px;
   z-index: 2000;
-  flex-direction: column !important;
-  gap: 0 !important;
-  transition: opacity 100ms ease, transform 100ms ease, visibility 0s 100ms;
-  transform: translateY(-4px);
-  pointer-events: none !important;
+  flex-direction: column;
+  gap: 0;
+  transition: opacity 120ms ease, transform 120ms ease;
+  transform: translateY(-6px);
+  pointer-events: none;
 }
 .toolbox-dropdown.open {
-  visibility: visible !important;
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 100ms ease, transform 100ms ease, visibility 0s 0s;
-  pointer-events: auto !important;
+  pointer-events: auto;
 }
 .toolbox-dropdown li {
-  display: block !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  opacity: 1 !important;
-  transform: none !important;
+  display: block;
+  margin: 0;
+  padding: 0;
 }
 .toolbox-dropdown a {
   display: block;
@@ -1269,8 +1339,8 @@ header.scrolled {
   line-height: 1.4;
 }
 .toolbox-dropdown a:hover {
-  background: var(--text);
-  color: var(--bg);
+  background: var(--surface);
+  color: var(--accent);
 }
 
 /* ============================================================

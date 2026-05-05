@@ -38,113 +38,154 @@
                 <path id="r6" d="M 320,0 A 320,320 0 1,1 -320,0 A 320,320 0 1,1 320,0"/>
                 <path id="r7" d="M 340,0 A 340,340 0 1,1 -340,0 A 340,340 0 1,1 340,0"/>
                 <path id="r8" d="M 360,0 A 360,360 0 1,1 -360,0 A 360,360 0 1,1 360,0"/>
+
+                <!-- Native SVG glow: wide blurs on thin stroke = visible falloff gradient -->
+                <filter id="glow" x="-500%" y="-500%" width="1100%" height="1100%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="40" result="b40"/>
+                    <feComponentTransfer in="b40" result="halo">
+                        <feFuncA type="linear" slope="0.12"/>
+                    </feComponentTransfer>
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="b14"/>
+                    <feComponentTransfer in="b14" result="glow">
+                        <feFuncA type="linear" slope="0.35"/>
+                    </feComponentTransfer>
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b3"/>
+                    <feComponentTransfer in="b3" result="tight">
+                        <feFuncA type="linear" slope="0.7"/>
+                    </feComponentTransfer>
+                    <feMerge>
+                        <feMergeNode in="halo"/>
+                        <feMergeNode in="glow"/>
+                        <feMergeNode in="tight"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
             </defs>
-
-            <!-- ===== Seq 1: Outer hex + brackets (first) ===== -->
-            <g class="logo-pop logo-pop-1" stroke="currentColor" fill="none">
-                <polygon points="700,10 873.2,110 873.2,310 700,410 526.8,310 526.8,110"
-                         stroke-width="1.5" opacity="0.55"/>
-                <path d="M490,120 L475,120 L475,140" stroke-width="1" opacity="0.28"/>
-                <path d="M490,300 L475,300 L475,280" stroke-width="1" opacity="0.28"/>
-                <path d="M910,120 L925,120 L925,140" stroke-width="1" opacity="0.28"/>
-                <path d="M910,300 L925,300 L925,280" stroke-width="1" opacity="0.28"/>
-            </g>
-
-            <!-- ===== Seq 2: Inner hex + radial branches ===== -->
-            <g class="logo-pop logo-pop-2" stroke="currentColor" fill="none">
-                <polygon points="700,50 838.6,130 838.6,290 700,370 561.4,290 561.4,130"
-                         stroke-width="0.6" opacity="0.25"/>
-                <line x1="700" y1="55"  x2="700" y2="10"  stroke-width="1.2" opacity="0.45"/>
-                <line x1="815" y1="95"  x2="920" y2="55"  stroke-width="1.2" opacity="0.45"/>
-                <line x1="855" y1="210" x2="980" y2="200" stroke-width="1.2" opacity="0.45"/>
-                <line x1="815" y1="325" x2="920" y2="350" stroke-width="1.2" opacity="0.45"/>
-                <line x1="700" y1="365" x2="700" y2="410" stroke-width="1.2" opacity="0.45"/>
-                <line x1="585" y1="325" x2="480" y2="350" stroke-width="1.2" opacity="0.45"/>
-                <line x1="545" y1="210" x2="420" y2="200" stroke-width="1.2" opacity="0.45"/>
-                <line x1="585" y1="95"  x2="480" y2="55"  stroke-width="1.2" opacity="0.45"/>
-                <line x1="775" y1="140" x2="870" y2="110" stroke-width="0.5" opacity="0.22"/>
-                <line x1="775" y1="280" x2="870" y2="300" stroke-width="0.5" opacity="0.22"/>
-                <line x1="625" y1="140" x2="530" y2="110" stroke-width="0.5" opacity="0.22"/>
-                <line x1="625" y1="280" x2="530" y2="300" stroke-width="0.5" opacity="0.22"/>
-            </g>
-
-            <!-- ===== Seq 3: Diamond core (triple rings + X cross + tie lines) ===== -->
-            <g class="logo-pop logo-pop-3" stroke="currentColor" fill="none">
-                <polygon points="700,55 855,210 700,365 545,210" stroke-width="0.7" opacity="0.3"/>
-                <polygon points="700,95 815,210 700,325 585,210" stroke-width="2.2" opacity="0.7"/>
-                <polygon points="700,140 775,210 700,280 625,210" stroke-width="0.9" opacity="0.35"/>
-                <line x1="585" y1="95"  x2="815" y2="325" stroke-width="0.7" opacity="0.3"/>
-                <line x1="815" y1="95"  x2="585" y2="325" stroke-width="0.7" opacity="0.3"/>
-                <line x1="585" y1="210" x2="545" y2="210" stroke-width="0.5" opacity="0.2"/>
-                <line x1="815" y1="210" x2="855" y2="210" stroke-width="0.5" opacity="0.2"/>
-            </g>
-
-            <!-- ===== Seq 4: All node dots ===== -->
-            <g class="logo-pop logo-pop-4" fill="currentColor">
-                <circle cx="700"   cy="10"  r="3.8" opacity="0.7"/>
-                <circle cx="873.2" cy="110" r="3.8" opacity="0.7"/>
-                <circle cx="873.2" cy="310" r="3.8" opacity="0.7"/>
-                <circle cx="700"   cy="410" r="3.8" opacity="0.7"/>
-                <circle cx="526.8" cy="310" r="3.8" opacity="0.7"/>
-                <circle cx="526.8" cy="110" r="3.8" opacity="0.7"/>
-                <circle cx="700"   cy="50"  r="2.2" opacity="0.45"/>
-                <circle cx="838.6" cy="130" r="2.2" opacity="0.45"/>
-                <circle cx="838.6" cy="290" r="2.2" opacity="0.45"/>
-                <circle cx="700"   cy="370" r="2.2" opacity="0.45"/>
-                <circle cx="561.4" cy="290" r="2.2" opacity="0.45"/>
-                <circle cx="561.4" cy="130" r="2.2" opacity="0.45"/>
-                <circle cx="700" cy="95"  r="2.5" opacity="0.75"/>
-                <circle cx="815" cy="210" r="2.5" opacity="0.75"/>
-                <circle cx="700" cy="325" r="2.5" opacity="0.75"/>
-                <circle cx="585" cy="210" r="2.5" opacity="0.75"/>
-                <circle cx="700" cy="55"  r="2" opacity="0.45"/>
-                <circle cx="855" cy="210" r="2" opacity="0.45"/>
-                <circle cx="700" cy="365" r="2" opacity="0.45"/>
-                <circle cx="545" cy="210" r="2" opacity="0.45"/>
-                <circle cx="700" cy="140" r="1.5" opacity="0.4"/>
-                <circle cx="775" cy="210" r="1.5" opacity="0.4"/>
-                <circle cx="700" cy="280" r="1.5" opacity="0.4"/>
-                <circle cx="625" cy="210" r="1.5" opacity="0.4"/>
-                <circle cx="920" cy="55"  r="2" opacity="0.4"/>
-                <circle cx="980" cy="200" r="2" opacity="0.4"/>
-                <circle cx="920" cy="350" r="2" opacity="0.4"/>
-                <circle cx="480" cy="350" r="2" opacity="0.4"/>
-                <circle cx="420" cy="200" r="2" opacity="0.4"/>
-                <circle cx="480" cy="55"  r="2" opacity="0.4"/>
-                <circle cx="870" cy="110" r="1.2" opacity="0.25"/>
-                <circle cx="870" cy="300" r="1.2" opacity="0.25"/>
-                <circle cx="530" cy="110" r="1.2" opacity="0.25"/>
-                <circle cx="530" cy="300" r="1.2" opacity="0.25"/>
-                <circle cx="700" cy="210" r="2.5" opacity="0.6"/>
-            </g>
 
             <!-- ===== Seq 5: 8-Layer Serial Rings (JS-driven rotation) ===== -->
             <g transform="translate(700, 210)">
                 <g id="serial-ring">
-                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="1.0" letter-spacing="1.5">
-                        <textPath href="#r1" startOffset="0%">COM3:115200 8N1 | recmod=1 FF FF FF | t0.txt="OK" FF FF FF | n0.val=100 FF FF FF | baud=115200 FF FF FF | page 0 FF FF FF | 5A A5 06 83 00 20 01 00 01 | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | usize=128 FF FF FF |</textPath>
-                    </text>
-                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.9" letter-spacing="1.5">
-                        <textPath href="#r2" startOffset="12%">usize=128 FF FF FF | t1.txt="DONE" FF FF FF | n1.val=255 FF FF FF | whmi-wri 10000,115200,0 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | btlen t0.txt FF FF FF | recmod=1 FF FF FF | t0.txt="OK" FF FF FF |</textPath>
-                    </text>
-                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.75" letter-spacing="1.5">
-                        <textPath href="#r3" startOffset="25%">COM3:115200 8N1 | t0.txt="OK" FF FF FF | n0.val=100 FF FF FF | page 0 FF FF FF | 5A A5 06 83 00 20 | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | usize=128 FF FF FF | baud=115200 FF FF FF | n1.val=255 FF FF FF |</textPath>
-                    </text>
-                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.6" letter-spacing="1.5">
-                        <textPath href="#r4" startOffset="38%">t1.txt="DONE" FF FF FF | n1.val=255 FF FF FF | whmi-wri 10000,115200,0 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | btlen t0.txt FF FF FF | baud=115200 FF FF FF | recmod=1 FF FF FF | n0.val=100 FF FF FF |</textPath>
-                    </text>
-                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.45" letter-spacing="1.5">
-                        <textPath href="#r5" startOffset="50%">COM3:115200 8N1 | recmod=1 FF FF FF | t0.txt="OK" FF FF FF | n0.val=100 FF FF FF | 5A A5 06 83 00 20 01 00 01 | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | page 0 FF FF FF | usize=128 FF FF FF |</textPath>
-                    </text>
-                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.3" letter-spacing="1.5">
-                        <textPath href="#r6" startOffset="63%">usize=128 FF FF FF | t1.txt="DONE" FF FF FF | n1.val=255 FF FF FF | whmi-wri 10000,115200,0 FF FF FF | baud=115200 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | t0.txt="OK" FF FF FF |</textPath>
-                    </text>
-                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.18" letter-spacing="1.5">
-                        <textPath href="#r7" startOffset="75%">COM3:115200 8N1 | recmod=1 FF FF FF | n0.val=100 FF FF FF | page 0 FF FF FF | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | t0.txt="OK" FF FF FF | baud=115200 FF FF FF | n1.val=255 FF FF FF |</textPath>
-                    </text>
-                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.1" letter-spacing="1.5">
-                        <textPath href="#r8" startOffset="5%">whmi-wri 10000,115200,0 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | btlen t0.txt FF FF FF | t1.txt="DONE" FF FF FF | n1.val=255 FF FF FF | baud=115200 FF FF FF | recmod=1 FF FF FF |</textPath>
-                    </text>
+                        <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="1.0" letter-spacing="1.5">
+                            <textPath href="#r1" startOffset="0%">COM3:115200 8N1 | recmod=1 FF FF FF | t0.txt="OK" FF FF FF | n0.val=100 FF FF FF | baud=115200 FF FF FF | page 0 FF FF FF | 5A A5 06 83 00 20 01 00 01 | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | usize=128 FF FF FF |</textPath>
+                        </text>
+                        <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.9" letter-spacing="1.5">
+                            <textPath href="#r2" startOffset="12%">usize=128 FF FF FF | t1.txt="DONE" FF FF FF | n1.val=255 FF FF FF | whmi-wri 10000,115200,0 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | btlen t0.txt FF FF FF | recmod=1 FF FF FF | t0.txt="OK" FF FF FF |</textPath>
+                        </text>
+                        <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.75" letter-spacing="1.5">
+                            <textPath href="#r3" startOffset="25%">COM3:115200 8N1 | t0.txt="OK" FF FF FF | n0.val=100 FF FF FF | page 0 FF FF FF | 5A A5 06 83 00 20 | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | usize=128 FF FF FF | baud=115200 FF FF FF | n1.val=255 FF FF FF |</textPath>
+                        </text>
+                        <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.6" letter-spacing="1.5">
+                            <textPath href="#r4" startOffset="38%">t1.txt="DONE" FF FF FF | n1.val=255 FF FF FF | whmi-wri 10000,115200,0 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | btlen t0.txt FF FF FF | baud=115200 FF FF FF | recmod=1 FF FF FF | n0.val=100 FF FF FF |</textPath>
+                        </text>
+                        <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.45" letter-spacing="1.5">
+                            <textPath href="#r5" startOffset="50%">COM3:115200 8N1 | recmod=1 FF FF FF | t0.txt="OK" FF FF FF | n0.val=100 FF FF FF | 5A A5 06 83 00 20 01 00 01 | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | page 0 FF FF FF | usize=128 FF FF FF |</textPath>
+                        </text>
+                        <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.3" letter-spacing="1.5">
+                            <textPath href="#r6" startOffset="63%">usize=128 FF FF FF | t1.txt="DONE" FF FF FF | n1.val=255 FF FF FF | whmi-wri 10000,115200,0 FF FF FF | baud=115200 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | t0.txt="OK" FF FF FF |</textPath>
+                        </text>
+                        <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.18" letter-spacing="1.5">
+                            <textPath href="#r7" startOffset="75%">COM3:115200 8N1 | recmod=1 FF FF FF | n0.val=100 FF FF FF | page 0 FF FF FF | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | t0.txt="OK" FF FF FF | baud=115200 FF FF FF | n1.val=255 FF FF FF |</textPath>
+                        </text>
+                        <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.1" letter-spacing="1.5">
+                            <textPath href="#r8" startOffset="5%">whmi-wri 10000,115200,0 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | btlen t0.txt FF FF FF | t1.txt="DONE" FF FF FF | n1.val=255 FF FF FF | baud=115200 FF FF FF | recmod=1 FF FF FF |</textPath>
+                        </text>
+                    </g>
+            </g>
+
+            <!-- ===== Seq 1: Outer hex + brackets ===== -->
+            <g class="logo-pop logo-pop-1" stroke="currentColor" fill="none">
+                    <polygon points="700,10 873.2,110 873.2,310 700,410 526.8,310 526.8,110"
+                             stroke-width="1.5" opacity="0.55"/>
+                    <path d="M490,120 L475,120 L475,140" stroke-width="1" opacity="0.28"/>
+                    <path d="M490,300 L475,300 L475,280" stroke-width="1" opacity="0.28"/>
+                    <path d="M910,120 L925,120 L925,140" stroke-width="1" opacity="0.28"/>
+                    <path d="M910,300 L925,300 L925,280" stroke-width="1" opacity="0.28"/>
+                    <!-- Hidden overlay lines for polygon edges (random flash pool) -->
+                    <g class="edge-overlay" stroke="currentColor" stroke-width="2.2">
+                        <line x1="700" y1="10" x2="873.2" y2="110"/><line x1="873.2" y1="110" x2="873.2" y2="310"/>
+                        <line x1="873.2" y1="310" x2="700" y2="410"/><line x1="700" y1="410" x2="526.8" y2="310"/>
+                        <line x1="526.8" y1="310" x2="526.8" y2="110"/><line x1="526.8" y1="110" x2="700" y2="10"/>
+                    </g>
+                </g>
+
+            <!-- ===== Seq 2: Inner hex + radial branches ===== -->
+            <g class="logo-pop logo-pop-2" stroke="currentColor" fill="none">
+                    <polygon points="700,50 838.6,130 838.6,290 700,370 561.4,290 561.4,130"
+                             stroke-width="0.6" opacity="0.25"/>
+                    <g class="edge-overlay" stroke="currentColor" stroke-width="2">
+                        <line x1="700" y1="50" x2="838.6" y2="130"/><line x1="838.6" y1="130" x2="838.6" y2="290"/>
+                        <line x1="838.6" y1="290" x2="700" y2="370"/><line x1="700" y1="370" x2="561.4" y2="290"/>
+                        <line x1="561.4" y1="290" x2="561.4" y2="130"/><line x1="561.4" y1="130" x2="700" y2="50"/>
+                    </g>
+                    <line x1="700" y1="55"  x2="700" y2="10"  stroke-width="1.2" opacity="0.45"/>
+                    <line x1="815" y1="95"  x2="920" y2="55"  stroke-width="1.2" opacity="0.45"/>
+                    <line x1="855" y1="210" x2="980" y2="200" stroke-width="1.2" opacity="0.45"/>
+                    <line x1="815" y1="325" x2="920" y2="350" stroke-width="1.2" opacity="0.45"/>
+                    <line x1="700" y1="365" x2="700" y2="410" stroke-width="1.2" opacity="0.45"/>
+                    <line x1="585" y1="325" x2="480" y2="350" stroke-width="1.2" opacity="0.45"/>
+                    <line x1="545" y1="210" x2="420" y2="200" stroke-width="1.2" opacity="0.45"/>
+                    <line x1="585" y1="95"  x2="480" y2="55"  stroke-width="1.2" opacity="0.45"/>
+                    <line x1="775" y1="140" x2="870" y2="110" stroke-width="0.5" opacity="0.22"/>
+                    <line x1="775" y1="280" x2="870" y2="300" stroke-width="0.5" opacity="0.22"/>
+                    <line x1="625" y1="140" x2="530" y2="110" stroke-width="0.5" opacity="0.22"/>
+                    <line x1="625" y1="280" x2="530" y2="300" stroke-width="0.5" opacity="0.22"/>
+                </g>
+
+            <!-- ===== Seq 3: Diamond core ===== -->
+            <g class="logo-pop logo-pop-3" stroke="currentColor" fill="none">
+                    <polygon points="700,55 855,210 700,365 545,210" stroke-width="0.7" opacity="0.3"/>
+                    <polygon points="700,95 815,210 700,325 585,210" stroke-width="2.2" opacity="0.7"/>
+                    <polygon points="700,140 775,210 700,280 625,210" stroke-width="0.9" opacity="0.35"/>
+                    <line x1="585" y1="95"  x2="815" y2="325" stroke-width="0.7" opacity="0.3"/>
+                    <line x1="815" y1="95"  x2="585" y2="325" stroke-width="0.7" opacity="0.3"/>
+                    <line x1="585" y1="210" x2="545" y2="210" stroke-width="0.5" opacity="0.2"/>
+                    <line x1="815" y1="210" x2="855" y2="210" stroke-width="0.5" opacity="0.2"/>
+                    <!-- Hidden overlay lines for diamond edges (random flash pool) -->
+                    <g class="edge-overlay" stroke="currentColor" stroke-width="2.2">
+                        <line x1="700" y1="55" x2="855" y2="210"/><line x1="855" y1="210" x2="700" y2="365"/>
+                        <line x1="700" y1="365" x2="545" y2="210"/><line x1="545" y1="210" x2="700" y2="55"/>
+                        <line x1="700" y1="95" x2="815" y2="210"/><line x1="815" y1="210" x2="700" y2="325"/>
+                        <line x1="700" y1="325" x2="585" y2="210"/><line x1="585" y1="210" x2="700" y2="95"/>
+                    </g>
+                </g>
+
+            <!-- ===== Seq 4: All node dots ===== -->
+            <g class="logo-pop logo-pop-4" fill="currentColor">
+                    <circle cx="700"   cy="10"  r="3.8" opacity="0.7"/>
+                    <circle cx="873.2" cy="110" r="3.8" opacity="0.7"/>
+                    <circle cx="873.2" cy="310" r="3.8" opacity="0.7"/>
+                    <circle cx="700"   cy="410" r="3.8" opacity="0.7"/>
+                    <circle cx="526.8" cy="310" r="3.8" opacity="0.7"/>
+                    <circle cx="526.8" cy="110" r="3.8" opacity="0.7"/>
+                    <circle cx="700"   cy="50"  r="2.2" opacity="0.45"/>
+                    <circle cx="838.6" cy="130" r="2.2" opacity="0.45"/>
+                    <circle cx="838.6" cy="290" r="2.2" opacity="0.45"/>
+                    <circle cx="700"   cy="370" r="2.2" opacity="0.45"/>
+                    <circle cx="561.4" cy="290" r="2.2" opacity="0.45"/>
+                    <circle cx="561.4" cy="130" r="2.2" opacity="0.45"/>
+                    <circle cx="700" cy="95"  r="2.5" opacity="0.75"/>
+                    <circle cx="815" cy="210" r="2.5" opacity="0.75"/>
+                    <circle cx="700" cy="325" r="2.5" opacity="0.75"/>
+                    <circle cx="585" cy="210" r="2.5" opacity="0.75"/>
+                    <circle cx="700" cy="55"  r="2" opacity="0.45"/>
+                    <circle cx="855" cy="210" r="2" opacity="0.45"/>
+                    <circle cx="700" cy="365" r="2" opacity="0.45"/>
+                    <circle cx="545" cy="210" r="2" opacity="0.45"/>
+                    <circle cx="700" cy="140" r="1.5" opacity="0.4"/>
+                    <circle cx="775" cy="210" r="1.5" opacity="0.4"/>
+                    <circle cx="700" cy="280" r="1.5" opacity="0.4"/>
+                    <circle cx="625" cy="210" r="1.5" opacity="0.4"/>
+                    <circle cx="920" cy="55"  r="2" opacity="0.4"/>
+                    <circle cx="980" cy="200" r="2" opacity="0.4"/>
+                    <circle cx="920" cy="350" r="2" opacity="0.4"/>
+                    <circle cx="480" cy="350" r="2" opacity="0.4"/>
+                    <circle cx="420" cy="200" r="2" opacity="0.4"/>
+                    <circle cx="480" cy="55"  r="2" opacity="0.4"/>
+                    <circle cx="870" cy="110" r="1.2" opacity="0.25"/>
+                    <circle cx="870" cy="300" r="1.2" opacity="0.25"/>
+                    <circle cx="530" cy="110" r="1.2" opacity="0.25"/>
+                    <circle cx="530" cy="300" r="1.2" opacity="0.25"/>
+                    <circle cx="700" cy="210" r="2.5" opacity="0.6"/>
                 </g>
             </g>
         </svg>
@@ -184,34 +225,42 @@
         <!-- Left: Logo + Title + Divider + Data Module -->
         <div class="header-left-group">
 
-            <!-- Large geometric diamond / molecular-structure logo -->
+            <!-- Geometric hex emblem — synced with background center logo -->
             <svg class="header-logo-icon" viewBox="0 0 48 48" width="42" height="42">
-                <!-- Outer diamond — solid -->
-                <polygon points="24,2 44,24 24,46 4,24"
-                         fill="none" stroke="currentColor" stroke-width="2" opacity="0.8"/>
-                <!-- Inner diamond — solid -->
-                <polygon points="24,12 35,24 24,36 13,24"
-                         fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+                <!-- Outer hexagon -->
+                <polygon points="24,4 41.3,14 41.3,34 24,44 6.7,34 6.7,14"
+                         fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7"/>
+                <!-- Diamond core -->
+                <polygon points="24,12 36,24 24,36 12,24"
+                         fill="none" stroke="currentColor" stroke-width="2" opacity="0.85"/>
+                <!-- Inner core -->
+                <polygon points="24,17 31,24 24,31 17,24"
+                         fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
                 <!-- Cross beams -->
-                <line x1="13" y1="12" x2="35" y2="36" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
-                <line x1="35" y1="12" x2="13" y2="36" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
-                <!-- Horizontal tie -->
-                <line x1="13" y1="24" x2="4"  y2="24" stroke="currentColor" stroke-width="0.7" opacity="0.3"/>
-                <line x1="35" y1="24" x2="44" y2="24" stroke="currentColor" stroke-width="0.7" opacity="0.3"/>
-                <!-- Vertical tie -->
-                <line x1="24" y1="2"  x2="24" y2="12" stroke="currentColor" stroke-width="0.7" opacity="0.3"/>
-                <line x1="24" y1="36" x2="24" y2="46" stroke="currentColor" stroke-width="0.7" opacity="0.3"/>
-                <!-- Vertex nodes -->
-                <circle cx="24" cy="2"  r="2.8" fill="currentColor" opacity="0.85"/>
-                <circle cx="44" cy="24" r="2.8" fill="currentColor" opacity="0.85"/>
-                <circle cx="24" cy="46" r="2.8" fill="currentColor" opacity="0.85"/>
-                <circle cx="4"  cy="24" r="2.8" fill="currentColor" opacity="0.85"/>
-                <!-- Interior nodes -->
-                <circle cx="24" cy="24" r="2.2" fill="currentColor" opacity="0.6"/>
-                <circle cx="24" cy="12" r="1.5" fill="currentColor" opacity="0.45"/>
-                <circle cx="35" cy="24" r="1.5" fill="currentColor" opacity="0.45"/>
-                <circle cx="24" cy="36" r="1.5" fill="currentColor" opacity="0.45"/>
-                <circle cx="13" cy="24" r="1.5" fill="currentColor" opacity="0.45"/>
+                <line x1="12" y1="12" x2="36" y2="36" stroke="currentColor" stroke-width="0.7" opacity="0.35"/>
+                <line x1="36" y1="12" x2="12" y2="36" stroke="currentColor" stroke-width="0.7" opacity="0.35"/>
+                <!-- Tie lines -->
+                <line x1="12" y1="24" x2="6.7" y2="24" stroke="currentColor" stroke-width="0.6" opacity="0.3"/>
+                <line x1="36" y1="24" x2="41.3" y2="24" stroke="currentColor" stroke-width="0.6" opacity="0.3"/>
+                <!-- Brackets -->
+                <path d="M1,14 L3,14 M1,14 L1,16" stroke="currentColor" stroke-width="0.8" opacity="0.25"/>
+                <path d="M1,34 L3,34 M1,34 L1,32" stroke="currentColor" stroke-width="0.8" opacity="0.25"/>
+                <path d="M47,14 L45,14 M47,14 L47,16" stroke="currentColor" stroke-width="0.8" opacity="0.25"/>
+                <path d="M47,34 L45,34 M47,34 L47,32" stroke="currentColor" stroke-width="0.8" opacity="0.25"/>
+                <!-- Hex vertex nodes -->
+                <circle cx="24" cy="4" r="2.5" fill="currentColor" opacity="0.8"/>
+                <circle cx="41.3" cy="14" r="2.5" fill="currentColor" opacity="0.8"/>
+                <circle cx="41.3" cy="34" r="2.5" fill="currentColor" opacity="0.8"/>
+                <circle cx="24" cy="44" r="2.5" fill="currentColor" opacity="0.8"/>
+                <circle cx="6.7" cy="34" r="2.5" fill="currentColor" opacity="0.8"/>
+                <circle cx="6.7" cy="14" r="2.5" fill="currentColor" opacity="0.8"/>
+                <!-- Diamond nodes -->
+                <circle cx="24" cy="12" r="1.8" fill="currentColor" opacity="0.65"/>
+                <circle cx="36" cy="24" r="1.8" fill="currentColor" opacity="0.65"/>
+                <circle cx="24" cy="36" r="1.8" fill="currentColor" opacity="0.65"/>
+                <circle cx="12" cy="24" r="1.8" fill="currentColor" opacity="0.65"/>
+                <!-- Center -->
+                <circle cx="24" cy="24" r="2" fill="currentColor" opacity="0.75"/>
             </svg>
 
             <!-- Two-line title block -->
@@ -905,6 +954,260 @@
         var current = html.classList.contains('light') ? 'light' : 'dark';
         if (toggleBtn) toggleBtn.textContent = current === 'light' ? '[DARK]' : '[LIGHT]';
         try { window._waveAccent = getComputedStyle(html).getPropertyValue('--accent').trim(); } catch(e) {}
+    })();
+    </script>
+
+    <!-- ============================================================
+    BACKGROUND SVG ANIMATION ENGINE
+    - Parallax depth layers
+    - Line draw-in (staggered)
+    - Node quantum pulsing (random delays)
+    - Data-flow dash along polygon edges
+    - Mouse proximity glow + ripple rings
+    ============================================================ -->
+    <script>
+    (function() {
+        var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reducedMotion) return;
+
+        var svg = document.querySelector('.bg-watermark svg');
+        if (!svg) return;
+
+        // ---- Config ----
+        var PROXIMITY_THRESHOLD = 50;
+        var EASING = 0.06;
+
+        // ---- DOM collections ----
+        var circles = Array.from(svg.querySelectorAll('.logo-pop-4 circle'));
+        var allStrokes = Array.from(svg.querySelectorAll('.logo-pop-1 path, .logo-pop-1 polygon, .logo-pop-2 line, .logo-pop-2 polygon, .logo-pop-3 line, .logo-pop-3 polygon'));
+        // ---- Flash groups: polygons + line families flash as whole units ----
+        var flashGroups = [];
+
+        // 5 polygons: each flashes as one unit
+        var polys = svg.querySelectorAll('.logo-pop-1 polygon, .logo-pop-2 polygon, .logo-pop-3 polygon');
+        for (var i = 0; i < polys.length; i++) {
+            flashGroups.push([polys[i]]);
+        }
+
+        // Bracket corners: 4 paths flash together
+        var brackets = svg.querySelectorAll('.logo-pop-1 > path');
+        if (brackets.length) flashGroups.push(Array.from(brackets));
+
+        // Radial branches: 8 thick lines in logo-pop-2
+        var radials = svg.querySelectorAll('.logo-pop-2 > line[stroke-width="1.2"]');
+        if (radials.length) flashGroups.push(Array.from(radials));
+
+        // Fine branches: 4 thin lines in logo-pop-2
+        var fines = svg.querySelectorAll('.logo-pop-2 > line[stroke-width="0.5"]');
+        if (fines.length) flashGroups.push(Array.from(fines));
+
+        // Cross + tie lines in logo-pop-3
+        var crossLines = svg.querySelectorAll('.logo-pop-3 > line');
+        if (crossLines.length) flashGroups.push(Array.from(crossLines));
+
+        var rippleContainer = svg.querySelector('.logo-pop-4');
+
+        // ---- State ----
+        var mouseX = window.innerWidth / 2;
+        var mouseY = window.innerHeight / 2;
+        var smoothX = mouseX;
+        var smoothY = mouseY;
+        var lastRippleTime = 0;
+
+        // ---- Circle screen-position cache (via SVG matrix, accurate) ----
+        var circleCache = [];
+        function cacheCirclePositions() {
+            var ctm = svg.getScreenCTM();
+            if (!ctm) return;
+            circleCache = circles.map(function(c) {
+                var pt = svg.createSVGPoint();
+                pt.x = parseFloat(c.getAttribute('cx'));
+                pt.y = parseFloat(c.getAttribute('cy'));
+                var sp = pt.matrixTransform(ctm);
+                return { sx: sp.x, sy: sp.y, svgCx: pt.x, svgCy: pt.y, el: c };
+            });
+        }
+
+        // ---- Init node pulse delays ----
+        circles.forEach(function(c) {
+            c.style.setProperty('--pulse-delay', (Math.random() * 4).toFixed(2) + 's');
+            c.style.setProperty('--pulse-duration', (2 + Math.random() * 3.5).toFixed(2) + 's');
+            c.classList.add('node-pulse', 'node-glow');
+        });
+
+        // ---- Init line draw with staggered delays ----
+        allStrokes.forEach(function(el, i) {
+            el.classList.add('line-draw');
+            var delay = 1.2 + i * 0.025;
+            el.style.setProperty('--draw-delay', delay.toFixed(2) + 's');
+        });
+
+        // ---- Start random group flash + cache positions after pop-in ----
+        var flashGroup  = null;   // currently flashing group (array of elements)
+        var flashStart = 0;       // performance.now() when current flash began
+        var flashNext  = 0;       // timestamp to pick next group
+        var FLASH_DUR  = 1000;    // ms, total flash cycle
+
+        setTimeout(function() {
+            cacheCirclePositions();
+            pickFlashGroup();
+        }, 1500);
+
+        function resetGroup(g) {
+            for (var i = 0; i < g.length; i++) {
+                g[i].style.opacity = '';
+                g[i].removeAttribute('filter');
+                g[i].setAttribute('stroke-width', '');
+                g[i].setAttribute('stroke', '');
+            }
+        }
+
+        function pickFlashGroup() {
+            if (flashGroups.length === 0) return;
+            if (flashGroup) { resetGroup(flashGroup); flashGroup = null; }
+            flashGroup = flashGroups[Math.floor(Math.random() * flashGroups.length)];
+            flashStart = performance.now();
+            for (var i = 0; i < flashGroup.length; i++) {
+                flashGroup[i].style.opacity = '0';
+                flashGroup[i].setAttribute('stroke', 'white');
+            }
+        }
+
+        function applyFlash(time) {
+            if (!flashGroup) return;
+            var elapsed = (time - flashStart) / FLASH_DUR;
+            if (elapsed >= 1) {
+                resetGroup(flashGroup);
+                flashGroup = null;
+                flashNext = time + 1000 + Math.random() * 500;
+                return;
+            }
+            var op, sw;
+            if (elapsed < 0.08) {
+                var t = elapsed / 0.08;
+                op = t; sw = 0.5 + t * 4.5;
+            } else if (elapsed < 0.35) {
+                op = 1; sw = 5;
+            } else if (elapsed < 0.60) {
+                var t = (elapsed - 0.35) / 0.25;
+                op = 1 - t * 0.25; sw = 5 - t * 3.5;
+            } else {
+                var t = (elapsed - 0.60) / 0.40;
+                op = 0.75 * (1 - t); sw = 1.5 * (1 - t);
+            }
+            for (var i = 0; i < flashGroup.length; i++) {
+                var el = flashGroup[i];
+                el.style.opacity = Math.max(0, op).toFixed(3);
+                el.setAttribute('stroke-width', Math.max(0.5, sw).toFixed(1));
+                el.setAttribute('stroke', 'white');
+                el.setAttribute('filter', 'url(#glow)');
+            }
+        }
+
+        // ---- Ripple ring pool ----
+        var RIPPLE_POOL = 8;
+        var ripplePool = [];
+        for (var i = 0; i < RIPPLE_POOL; i++) {
+            var ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            ring.setAttribute('r', '0');
+            ring.setAttribute('fill', 'none');
+            ring.setAttribute('stroke', 'currentColor');
+            ring.classList.add('ripple-ring');
+            ring.style.display = 'none';
+            if (rippleContainer) rippleContainer.appendChild(ring);
+            ripplePool.push({ el: ring, active: false, born: 0 });
+        }
+        var rippleIdx = 0;
+
+        function fireRipple(svgX, svgY) {
+            var now = performance.now();
+            var slot = ripplePool[rippleIdx];
+            rippleIdx = (rippleIdx + 1) % RIPPLE_POOL;
+
+            var ring = slot.el;
+            ring.setAttribute('cx', svgX);
+            ring.setAttribute('cy', svgY);
+            ring.style.display = '';
+            ring.classList.remove('fire');
+            void ring.offsetWidth;
+            ring.classList.add('fire');
+
+            slot.active = true;
+            slot.born = now;
+            setTimeout(function() {
+                ring.style.display = 'none';
+                ring.classList.remove('fire');
+                slot.active = false;
+            }, 750);
+        }
+
+        // ---- Main loop ----
+        function loop(time) {
+            // Ease toward mouse
+            smoothX += (mouseX - smoothX) * EASING;
+            smoothY += (mouseY - smoothY) * EASING;
+
+            // ---- Edge flash (JS-driven, no CSS animation) ----
+            if (flashGroup) {
+                applyFlash(time);
+            } else if (time >= flashNext && flashNext > 0) {
+                pickFlashGroup();
+            }
+
+            // ---- Node proximity ----
+            var thresholdSq = PROXIMITY_THRESHOLD * PROXIMITY_THRESHOLD;
+            var nearestDist = Infinity;
+            var nearestEntry = null;
+
+            for (var i = 0; i < circleCache.length; i++) {
+                var entry = circleCache[i];
+                var ndx = smoothX - entry.sx;
+                var ndy = smoothY - entry.sy;
+                var distSq = ndx * ndx + ndy * ndy;
+
+                if (distSq < thresholdSq && distSq < nearestDist) {
+                    nearestDist = distSq;
+                    nearestEntry = entry;
+                }
+            }
+
+            // Reset all nodes to default
+            for (var i = 0; i < circleCache.length; i++) {
+                circleCache[i].el.style.filter = '';
+            }
+
+            // Highlight nearest node with filter-only glow
+            if (nearestEntry) {
+                var intensity = 1 - Math.sqrt(nearestDist) / PROXIMITY_THRESHOLD;
+                var glow = (intensity * 8).toFixed(1);
+                var bright = (1 + intensity * 3).toFixed(2);
+                nearestEntry.el.style.filter = 'brightness(' + bright + ') drop-shadow(0 0 ' + glow + 'px currentColor)';
+
+                // Ripple: low probability + cooldown
+                if (Math.random() < 0.04 && time - lastRippleTime > 600) {
+                    lastRippleTime = time;
+                    fireRipple(nearestEntry.svgCx, nearestEntry.svgCy);
+                }
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        // ---- Events ----
+        document.addEventListener('mousemove', function(e) {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        var resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(cacheCirclePositions, 200);
+        });
+
+        // ---- Init ----
+        cacheCirclePositions();
+        requestAnimationFrame(loop);
     })();
     </script>
 </body>
