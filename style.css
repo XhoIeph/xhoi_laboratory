@@ -1109,8 +1109,8 @@ header.nav-open #main-nav {
   .data-tag.top-right-tag { right: 60px; font-size: 0.45rem; }
 
   /* Mobile: shrink watermark */
-  .bg-watermark { width: 95vw; height: 50vh; opacity: 0.22; }
-  .bg-rings-wrapper { opacity: 0.14; }
+  .bg-watermark { width: 95vw; height: 50vh; opacity: 0.44; }
+  .bg-rings-wrapper { opacity: 0.28; }
   .bg-particles { display: none; }
 
   /* Mobile: waveform canvas fit */
