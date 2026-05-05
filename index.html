@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XhoI的小小实验室</title>
+    <!-- Inline theme detection: runs BEFORE page render, prevents flash -->
+    <script>
+    (function(){var t='light';try{t=localStorage.getItem('theme')||'light'}catch(e){}document.documentElement.className=t;})();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ============================================================
+    BACKGROUND LAYER SYSTEM (z-index: 0, pointer-events: none)
+    ============================================================ -->
+
+    <!-- Layer 0: Dot grid -->
+    <div class="bg-layer-grid"></div>
+
+    <!-- Layer 1: Scan lines -->
+    <div class="bg-layer-scan"></div>
+
+    <!-- Layer 2: SVG Emblem -->
+    <div class="bg-watermark">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -160 1400 740" width="100%" height="100%">
+            <defs>
+                <!-- 8 concentric circular paths for textPath (clockwise from 3-o'clock) -->
+                <path id="r1" d="M 220,0 A 220,220 0 1,1 -220,0 A 220,220 0 1,1 220,0"/>
+                <path id="r2" d="M 240,0 A 240,240 0 1,1 -240,0 A 240,240 0 1,1 240,0"/>
+                <path id="r3" d="M 260,0 A 260,260 0 1,1 -260,0 A 260,260 0 1,1 260,0"/>
+                <path id="r4" d="M 280,0 A 280,280 0 1,1 -280,0 A 280,280 0 1,1 280,0"/>
+                <path id="r5" d="M 300,0 A 300,300 0 1,1 -300,0 A 300,300 0 1,1 300,0"/>
+                <path id="r6" d="M 320,0 A 320,320 0 1,1 -320,0 A 320,320 0 1,1 320,0"/>
+                <path id="r7" d="M 340,0 A 340,340 0 1,1 -340,0 A 340,340 0 1,1 340,0"/>
+                <path id="r8" d="M 360,0 A 360,360 0 1,1 -360,0 A 360,360 0 1,1 360,0"/>
+            </defs>
+
+            <!-- ===== Seq 1: Outer hex + brackets (first) ===== -->
+            <g class="logo-pop logo-pop-1" stroke="currentColor" fill="none">
+                <polygon points="700,10 873.2,110 873.2,310 700,410 526.8,310 526.8,110"
+                         stroke-width="1.5" opacity="0.55"/>
+                <path d="M490,120 L475,120 L475,140" stroke-width="1" opacity="0.28"/>
+                <path d="M490,300 L475,300 L475,280" stroke-width="1" opacity="0.28"/>
+                <path d="M910,120 L925,120 L925,140" stroke-width="1" opacity="0.28"/>
+                <path d="M910,300 L925,300 L925,280" stroke-width="1" opacity="0.28"/>
+            </g>
+
+            <!-- ===== Seq 2: Inner hex + radial branches ===== -->
+            <g class="logo-pop logo-pop-2" stroke="currentColor" fill="none">
+                <polygon points="700,50 838.6,130 838.6,290 700,370 561.4,290 561.4,130"
+                         stroke-width="0.6" opacity="0.25"/>
+                <line x1="700" y1="55"  x2="700" y2="10"  stroke-width="1.2" opacity="0.45"/>
+                <line x1="815" y1="95"  x2="920" y2="55"  stroke-width="1.2" opacity="0.45"/>
+                <line x1="855" y1="210" x2="980" y2="200" stroke-width="1.2" opacity="0.45"/>
+                <line x1="815" y1="325" x2="920" y2="350" stroke-width="1.2" opacity="0.45"/>
+                <line x1="700" y1="365" x2="700" y2="410" stroke-width="1.2" opacity="0.45"/>
+                <line x1="585" y1="325" x2="480" y2="350" stroke-width="1.2" opacity="0.45"/>
+                <line x1="545" y1="210" x2="420" y2="200" stroke-width="1.2" opacity="0.45"/>
+                <line x1="585" y1="95"  x2="480" y2="55"  stroke-width="1.2" opacity="0.45"/>
+                <line x1="775" y1="140" x2="870" y2="110" stroke-width="0.5" opacity="0.22"/>
+                <line x1="775" y1="280" x2="870" y2="300" stroke-width="0.5" opacity="0.22"/>
+                <line x1="625" y1="140" x2="530" y2="110" stroke-width="0.5" opacity="0.22"/>
+                <line x1="625" y1="280" x2="530" y2="300" stroke-width="0.5" opacity="0.22"/>
+            </g>
+
+            <!-- ===== Seq 3: Diamond core (triple rings + X cross + tie lines) ===== -->
+            <g class="logo-pop logo-pop-3" stroke="currentColor" fill="none">
+                <polygon points="700,55 855,210 700,365 545,210" stroke-width="0.7" opacity="0.3"/>
+                <polygon points="700,95 815,210 700,325 585,210" stroke-width="2.2" opacity="0.7"/>
+                <polygon points="700,140 775,210 700,280 625,210" stroke-width="0.9" opacity="0.35"/>
+                <line x1="585" y1="95"  x2="815" y2="325" stroke-width="0.7" opacity="0.3"/>
+                <line x1="815" y1="95"  x2="585" y2="325" stroke-width="0.7" opacity="0.3"/>
+                <line x1="585" y1="210" x2="545" y2="210" stroke-width="0.5" opacity="0.2"/>
+                <line x1="815" y1="210" x2="855" y2="210" stroke-width="0.5" opacity="0.2"/>
+            </g>
+
+            <!-- ===== Seq 4: All node dots ===== -->
+            <g class="logo-pop logo-pop-4" fill="currentColor">
+                <circle cx="700"   cy="10"  r="3.8" opacity="0.7"/>
+                <circle cx="873.2" cy="110" r="3.8" opacity="0.7"/>
+                <circle cx="873.2" cy="310" r="3.8" opacity="0.7"/>
+                <circle cx="700"   cy="410" r="3.8" opacity="0.7"/>
+                <circle cx="526.8" cy="310" r="3.8" opacity="0.7"/>
+                <circle cx="526.8" cy="110" r="3.8" opacity="0.7"/>
+                <circle cx="700"   cy="50"  r="2.2" opacity="0.45"/>
+                <circle cx="838.6" cy="130" r="2.2" opacity="0.45"/>
+                <circle cx="838.6" cy="290" r="2.2" opacity="0.45"/>
+                <circle cx="700"   cy="370" r="2.2" opacity="0.45"/>
+                <circle cx="561.4" cy="290" r="2.2" opacity="0.45"/>
+                <circle cx="561.4" cy="130" r="2.2" opacity="0.45"/>
+                <circle cx="700" cy="95"  r="2.5" opacity="0.75"/>
+                <circle cx="815" cy="210" r="2.5" opacity="0.75"/>
+                <circle cx="700" cy="325" r="2.5" opacity="0.75"/>
+                <circle cx="585" cy="210" r="2.5" opacity="0.75"/>
+                <circle cx="700" cy="55"  r="2" opacity="0.45"/>
+                <circle cx="855" cy="210" r="2" opacity="0.45"/>
+                <circle cx="700" cy="365" r="2" opacity="0.45"/>
+                <circle cx="545" cy="210" r="2" opacity="0.45"/>
+                <circle cx="700" cy="140" r="1.5" opacity="0.4"/>
+                <circle cx="775" cy="210" r="1.5" opacity="0.4"/>
+                <circle cx="700" cy="280" r="1.5" opacity="0.4"/>
+                <circle cx="625" cy="210" r="1.5" opacity="0.4"/>
+                <circle cx="920" cy="55"  r="2" opacity="0.4"/>
+                <circle cx="980" cy="200" r="2" opacity="0.4"/>
+                <circle cx="920" cy="350" r="2" opacity="0.4"/>
+                <circle cx="480" cy="350" r="2" opacity="0.4"/>
+                <circle cx="420" cy="200" r="2" opacity="0.4"/>
+                <circle cx="480" cy="55"  r="2" opacity="0.4"/>
+                <circle cx="870" cy="110" r="1.2" opacity="0.25"/>
+                <circle cx="870" cy="300" r="1.2" opacity="0.25"/>
+                <circle cx="530" cy="110" r="1.2" opacity="0.25"/>
+                <circle cx="530" cy="300" r="1.2" opacity="0.25"/>
+                <circle cx="700" cy="210" r="2.5" opacity="0.6"/>
+            </g>
+
+            <!-- ===== Seq 5: 8-Layer Serial Rings (JS-driven rotation) ===== -->
+            <g transform="translate(700, 210)">
+                <g id="serial-ring">
+                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="1.0" letter-spacing="1.5">
+                        <textPath href="#r1" startOffset="0%">COM3:115200 8N1 | recmod=1 FF FF FF | t0.txt="OK" FF FF FF | n0.val=100 FF FF FF | baud=115200 FF FF FF | page 0 FF FF FF | 5A A5 06 83 00 20 01 00 01 | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | usize=128 FF FF FF |</textPath>
+                    </text>
+                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.9" letter-spacing="1.5">
+                        <textPath href="#r2" startOffset="12%">usize=128 FF FF FF | t1.txt="DONE" FF FF FF | n1.val=255 FF FF FF | whmi-wri 10000,115200,0 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | btlen t0.txt FF FF FF | recmod=1 FF FF FF | t0.txt="OK" FF FF FF |</textPath>
+                    </text>
+                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.75" letter-spacing="1.5">
+                        <textPath href="#r3" startOffset="25%">COM3:115200 8N1 | t0.txt="OK" FF FF FF | n0.val=100 FF FF FF | page 0 FF FF FF | 5A A5 06 83 00 20 | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | usize=128 FF FF FF | baud=115200 FF FF FF | n1.val=255 FF FF FF |</textPath>
+                    </text>
+                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.6" letter-spacing="1.5">
+                        <textPath href="#r4" startOffset="38%">t1.txt="DONE" FF FF FF | n1.val=255 FF FF FF | whmi-wri 10000,115200,0 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | btlen t0.txt FF FF FF | baud=115200 FF FF FF | recmod=1 FF FF FF | n0.val=100 FF FF FF |</textPath>
+                    </text>
+                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.45" letter-spacing="1.5">
+                        <textPath href="#r5" startOffset="50%">COM3:115200 8N1 | recmod=1 FF FF FF | t0.txt="OK" FF FF FF | n0.val=100 FF FF FF | 5A A5 06 83 00 20 01 00 01 | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | page 0 FF FF FF | usize=128 FF FF FF |</textPath>
+                    </text>
+                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.3" letter-spacing="1.5">
+                        <textPath href="#r6" startOffset="63%">usize=128 FF FF FF | t1.txt="DONE" FF FF FF | n1.val=255 FF FF FF | whmi-wri 10000,115200,0 FF FF FF | baud=115200 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | t0.txt="OK" FF FF FF |</textPath>
+                    </text>
+                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.18" letter-spacing="1.5">
+                        <textPath href="#r7" startOffset="75%">COM3:115200 8N1 | recmod=1 FF FF FF | n0.val=100 FF FF FF | page 0 FF FF FF | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | t0.txt="OK" FF FF FF | baud=115200 FF FF FF | n1.val=255 FF FF FF |</textPath>
+                    </text>
+                    <text font-family="'JetBrains Mono','Courier New',monospace" font-size="10" fill="currentColor" opacity="0.1" letter-spacing="1.5">
+                        <textPath href="#r8" startOffset="5%">whmi-wri 10000,115200,0 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | btlen t0.txt FF FF FF | t1.txt="DONE" FF FF FF | n1.val=255 FF FF FF | baud=115200 FF FF FF | recmod=1 FF FF FF |</textPath>
+                    </text>
+                </g>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Layer 2b: Canvas ring system (8 independent layers for diff-rotation + 3D) -->
+    <div class="bg-rings-wrapper" id="bg-rings-wrapper" aria-hidden="true">
+        <canvas class="bg-ring" id="bg-ring-0"></canvas>
+        <canvas class="bg-ring" id="bg-ring-1"></canvas>
+        <canvas class="bg-ring" id="bg-ring-2"></canvas>
+        <canvas class="bg-ring" id="bg-ring-3"></canvas>
+        <canvas class="bg-ring" id="bg-ring-4"></canvas>
+        <canvas class="bg-ring" id="bg-ring-5"></canvas>
+        <canvas class="bg-ring" id="bg-ring-6"></canvas>
+        <canvas class="bg-ring" id="bg-ring-7"></canvas>
+    </div>
+
+    <!-- Layer 3: Animated floating particles -->
+    <div class="bg-particles" aria-hidden="true">
+        <span class="particle p1"></span><span class="particle p2"></span>
+        <span class="particle p3"></span><span class="particle p4"></span>
+        <span class="particle p5"></span><span class="particle p6"></span>
+        <span class="particle p7"></span><span class="particle p8"></span>
+        <span class="particle p9"></span><span class="particle p10"></span>
+        <span class="particle p11"></span><span class="particle p12"></span>
+        <span class="particle p13"></span><span class="particle p14"></span>
+        <span class="particle p15"></span><span class="particle p16"></span>
+    </div>
+
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
+    <header>
+        <!-- Mobile hamburger -->
+        <button class="menu" aria-expanded="false" aria-controls="main-nav">&#9776;</button>
+
+        <!-- Left: Logo + Title + Divider + Data Module -->
+        <div class="header-left-group">
+
+            <!-- Large geometric diamond / molecular-structure logo -->
+            <svg class="header-logo-icon" viewBox="0 0 48 48" width="42" height="42">
+                <!-- Outer diamond — solid -->
+                <polygon points="24,2 44,24 24,46 4,24"
+                         fill="none" stroke="currentColor" stroke-width="2" opacity="0.8"/>
+                <!-- Inner diamond — solid -->
+                <polygon points="24,12 35,24 24,36 13,24"
+                         fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+                <!-- Cross beams -->
+                <line x1="13" y1="12" x2="35" y2="36" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
+                <line x1="35" y1="12" x2="13" y2="36" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
+                <!-- Horizontal tie -->
+                <line x1="13" y1="24" x2="4"  y2="24" stroke="currentColor" stroke-width="0.7" opacity="0.3"/>
+                <line x1="35" y1="24" x2="44" y2="24" stroke="currentColor" stroke-width="0.7" opacity="0.3"/>
+                <!-- Vertical tie -->
+                <line x1="24" y1="2"  x2="24" y2="12" stroke="currentColor" stroke-width="0.7" opacity="0.3"/>
+                <line x1="24" y1="36" x2="24" y2="46" stroke="currentColor" stroke-width="0.7" opacity="0.3"/>
+                <!-- Vertex nodes -->
+                <circle cx="24" cy="2"  r="2.8" fill="currentColor" opacity="0.85"/>
+                <circle cx="44" cy="24" r="2.8" fill="currentColor" opacity="0.85"/>
+                <circle cx="24" cy="46" r="2.8" fill="currentColor" opacity="0.85"/>
+                <circle cx="4"  cy="24" r="2.8" fill="currentColor" opacity="0.85"/>
+                <!-- Interior nodes -->
+                <circle cx="24" cy="24" r="2.2" fill="currentColor" opacity="0.6"/>
+                <circle cx="24" cy="12" r="1.5" fill="currentColor" opacity="0.45"/>
+                <circle cx="35" cy="24" r="1.5" fill="currentColor" opacity="0.45"/>
+                <circle cx="24" cy="36" r="1.5" fill="currentColor" opacity="0.45"/>
+                <circle cx="13" cy="24" r="1.5" fill="currentColor" opacity="0.45"/>
+            </svg>
+
+            <!-- Two-line title block -->
+            <div class="header-title-block">
+                <span class="header-title-zh">生物酶实验室</span>
+                <span class="header-title-en">ENZYME LABORATORY</span>
+            </div>
+
+            <!-- Vertical divider -->
+            <span class="header-vdivider"></span>
+
+            <!-- Data module: avatar + three-line info -->
+            <div class="header-info-block">
+                <div class="header-info-content">
+                    <!-- Avatar photo -->
+                    <div class="avatar-frame">
+                        <img src="image/avatar.png"
+                             alt="Avatar"
+                             onerror="this.style.display='none';this.parentElement.style.background='var(--surface)';this.parentElement.innerHTML+='<span style=display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:18px;color:var(--dim)>?</span>';">
+                    </div>
+                    <!-- Three-line data -->
+                    <div class="header-info-data">
+                        <span class="info-line"><span class="info-label info-label-uid">UID:</span><span class="info-val info-val-hex">0xAAF03BE</span></span>
+                        <span class="info-line"><span class="info-label info-label-status">STATUS:</span><span class="info-val info-val-active">ACTIVE</span></span>
+                        <span class="info-line info-line-sub">//ID:XhoI_Enzyme</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Telemetry + Waveform + Ticker -->
+        <div class="header-telemetry">
+            <!-- Line 1: sensor data -->
+            <span class="telem-line">
+                <span class="telem-prompt">></span>
+                <span class="telem-hex" id="telem-r0">0x4F</span>
+                <span class="telem-hex" id="telem-r1">0xB3</span>
+                <span class="telem-hex" id="telem-r2">0x2A</span>
+                <span class="telem-dim">|</span>
+                <span>S0:</span><span class="telem-val" id="telem-temp">36.5</span><span>C</span>
+                <span class="telem-dim">|</span>
+                <span>V:</span><span class="telem-val">3.30</span><span>V</span>
+                <span>F:</span><span class="telem-val" id="telem-freq">60.0</span><span>Hz</span>
+                <span class="telem-dim">|</span>
+                <span>MEM:</span><span class="telem-hex" id="telem-mem">0xB7</span>
+            </span>
+            <!-- Line 2: mini AD/DA waveform -->
+            <canvas class="telem-wave" id="telem-wave" width="300" height="18"></canvas>
+            <!-- Line 3: network + status -->
+            <span class="telem-line">
+                <span class="telem-prompt">></span>
+                <span>PKT#</span><span class="telem-val telem-blink" id="telem-pkt">012</span>
+                <span>RX:</span><span class="telem-val" id="telem-rx">045</span>
+                <span>TX:</span><span class="telem-val" id="telem-tx">089</span>
+                <span>ERR:</span><span class="telem-val">000</span>
+                <span class="telem-dim">|</span>
+                <span class="telem-msg" id="telem-msg">SYS:NOMINAL</span>
+                <span class="telem-dim">|</span>
+                <span class="telem-ts" id="telem-ts">12:00:05.200</span>
+            </span>
+            <!-- Line 4: serial message ticker -->
+            <span class="telem-ticker">
+                <span class="telem-ticker-text" id="telem-ticker-text">COM3:115200 8N1 | RX:0x4F 0xB3 0x2A | ACK | TX:PKT#012 | DONE</span>
+            </span>
+        </div>
+
+        <!-- Right: Navigation -->
+        <div class="header-right-group">
+            <ul id="main-nav">
+                <li><a href="https://space.bilibili.com/179241918" target="_blank">[BILIBILI]</a></li>
+                <li><a href="https://github.com/XhoIeph" target="_blank">[GITHUB]</a></li>
+                <li><a href="https://www.youtube.com/@XhoI_Enzyme" target="_blank">[YOUTUBE]</a></li>
+                <li><a href="https://www.nicovideo.jp/user/136740291" target="_blank">[NICONICO]</a></li>
+                <li><a href="blog.html">[BLOG]</a></li>
+                <li class="toolbox-container">
+                    <button class="toolbox-btn" id="toolbox-btn" aria-label="工具箱" title="工具箱">[TOOLS]</button>
+                    <ul class="toolbox-dropdown" id="toolbox-dropdown">
+                        <li><a href="converter.html">进制转换 CONVERTER</a></li>
+                        <li><a href="serial.html">串口助手 SERIAL</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <span class="sys-status">
+                        <span class="dot"></span>
+                        <span class="label">SYS_OK</span>
+                    </span>
+                </li>
+                <li>
+                    <button id="theme-toggle">[LIGHT]</button>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- ============================================================
+    SLIDER
+    ============================================================ -->
+    <section class="myself-slider">
+
+        <!-- Corner brackets on slider area only -->
+        <div class="corner-brackets">
+            <div class="corner-bracket tl"></div>
+            <div class="corner-bracket tr"></div>
+            <div class="corner-bracket bl"></div>
+            <div class="corner-bracket br"></div>
+        </div>
+
+        <!-- Decorative data tags floating on slider area -->
+        <span class="data-tag top-left-tag">0x0040:0000..0x0040:FFFF</span>
+        <span class="data-tag top-right-tag">REG:ACTIVE // FREQ:60Hz</span>
+
+        <button class="slider-btn slider-btn-left" aria-label="向左滑动">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16,4 8,12 16,20"/>
+            </svg>
+        </button>
+
+        <div class="slider-wrapper">
+            <div class="slider-track">
+
+                <!-- Slide 1 -->
+                <section class="myself slider-item">
+                    <h2 class="welcome-anim">Welcome to My Laboratory</h2>
+                    <h3 class="welcome-anim-delay">我的名字是 XhoI_Enzyme</h3>
+                    <p class="welcome-anim-delay">同时也是 Pedestrian</p>
+                    <span class="slide-addr-tag">0x0001 // SLIDE_01</span>
+                </section>
+
+                <!-- Slide 2: Friend Links (loaded from friends.json) -->
+                <section class="slider-item slide-links">
+                    <span class="slide-addr-tag">0x0002 // FRIENDS</span>
+                    <h2 class="slide-section-title">[ 友人链接 ]</h2>
+                    <div class="friends-grid" id="friends-grid"></div>
+                </section>
+
+                <!-- Slide 3: Works Showcase (all empty) -->
+                <section class="slider-item slide-works">
+                    <span class="slide-addr-tag">0x0003 // WORKS</span>
+                    <h2 class="slide-section-title">[ 作品展示 ]</h2>
+                    <div class="works-grid">
+                        <div class="work-card"><span class="work-num">01</span><span class="work-title">待添加</span><span class="work-desc">---</span></div>
+                        <div class="work-card"><span class="work-num">02</span><span class="work-title">待添加</span><span class="work-desc">---</span></div>
+                        <div class="work-card"><span class="work-num">03</span><span class="work-title">待添加</span><span class="work-desc">---</span></div>
+                        <div class="work-card"><span class="work-num">04</span><span class="work-title">待添加</span><span class="work-desc">---</span></div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+
+        <button class="slider-btn slider-btn-right" aria-label="向右滑动">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="8,4 16,12 8,20"/>
+            </svg>
+        </button>
+
+        <div class="slider-dots"></div>
+    </section>
+
+    <!-- ============================================================
+    STATUS BAR (bottom)
+    ============================================================ -->
+    <div class="status-bar">
+        <div class="sb-left">
+            <span>TTY1</span>
+            <span>|</span>
+            <span>UTF-8</span>
+            <span>|</span>
+            <span>100%</span>
+        </div>
+        <div class="sb-right">
+            <span>生物酶实验室</span>
+            <span>|</span>
+            <span>L:03</span>
+            <span>|</span>
+            <span class="sb-blink">● REC</span>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    SCRIPTS
+    ============================================================ -->
+    <script src="js/main.js"></script>
+    <script src="js/slider.js"></script>
+
+    <!-- Canvas ring system (8 independent layers) + particles + wheel interaction -->
+    <script>
+    (function() {
+        // ---- 8 independent ring canvases (one per ring for diff-rotation) ----
+        var ringCanvases = [];
+        var ringCtxs = [];
+        for (var i = 0; i < 8; i++) {
+            ringCanvases.push(document.getElementById('bg-ring-' + i));
+            ringCtxs.push(ringCanvases[i].getContext('2d'));
+        }
+
+        // ---- Ring data ----
+        var ringTexts = [
+            "COM3:115200 8N1 | recmod=1 FF FF FF | t0.txt=\"OK\" FF FF FF | n0.val=100 FF FF FF | baud=115200 FF FF FF | page 0 FF FF FF | 5A A5 06 83 00 20 01 00 01 | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | usize=128 FF FF FF |",
+            "usize=128 FF FF FF | t1.txt=\"DONE\" FF FF FF | n1.val=255 FF FF FF | whmi-wri 10000,115200,0 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | btlen t0.txt FF FF FF | recmod=1 FF FF FF | t0.txt=\"OK\" FF FF FF |",
+            "COM3:115200 8N1 | t0.txt=\"OK\" FF FF FF | n0.val=100 FF FF FF | page 0 FF FF FF | 5A A5 06 83 00 20 | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | usize=128 FF FF FF | baud=115200 FF FF FF | n1.val=255 FF FF FF |",
+            "t1.txt=\"DONE\" FF FF FF | n1.val=255 FF FF FF | whmi-wri 10000,115200,0 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | btlen t0.txt FF FF FF | baud=115200 FF FF FF | recmod=1 FF FF FF | n0.val=100 FF FF FF |",
+            "COM3:115200 8N1 | recmod=1 FF FF FF | t0.txt=\"OK\" FF FF FF | n0.val=100 FF FF FF | 5A A5 06 83 00 20 01 00 01 | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | page 0 FF FF FF | usize=128 FF FF FF |",
+            "usize=128 FF FF FF | t1.txt=\"DONE\" FF FF FF | n1.val=255 FF FF FF | whmi-wri 10000,115200,0 FF FF FF | baud=115200 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | t0.txt=\"OK\" FF FF FF |",
+            "COM3:115200 8N1 | recmod=1 FF FF FF | n0.val=100 FF FF FF | page 0 FF FF FF | AA 01 02 00 0D 0A | printh 4F B3 2A FF FF FF | click 0,1 FF FF FF | t0.txt=\"OK\" FF FF FF | baud=115200 FF FF FF | n1.val=255 FF FF FF |",
+            "whmi-wri 10000,115200,0 FF FF FF | prints 64 00 FF FF FF | crcrest crcputh crcval FF FF FF | ucopy 0,128 FF FF FF | btlen t0.txt FF FF FF | t1.txt=\"DONE\" FF FF FF | n1.val=255 FF FF FF | baud=115200 FF FF FF | recmod=1 FF FF FF |"
+        ];
+        var ringOpacities = [0.8, 0.7, 0.68, 0.6, 0.35, 0.20, 0.00, 0.00];
+        var ringRadii    = [130, 135, 140, 145, 150, 160, 170, 200];  // close to center → screen edges, step 10
+        var ringStarts   = [0, 12, 25, 38, 50, 63, 75, 5];
+
+        // 3D depth: outer rings "pop" toward viewer (higher Z = closer to camera)
+        var ringZOffsets = [-50, -20, 10, 40, 65, 90, 100, 130];
+
+        // ---- Per-ring rotation state (auto-rotate + wheel boost with inertia) ----
+        var ringAngles = [0, 0, 0, 0, 0, 0, 0, 0];
+        var ringBaseSpeeds = [0.13, 0.105, 0.082, 0.06, 0.043, 0.03, 0.02, 0.012]; // auto-rotation (wider spread)
+        var ringSpeedMul   = [2.0, 1.6, 1.25, 0.9, 0.6, 0.4, 0.22, 0.12];   // wheel multiplier
+        var ringWheelBoost = [0, 0, 0, 0, 0, 0, 0, 0];
+        var FRICTION = 0.93;
+        var WHEEL_SCALE = 0.008;
+
+        // ---- Draw each ring on its own canvas ----
+        function getTextColor() {
+            return document.documentElement.classList.contains('light') ? '#000000' : '#FFFFFF';
+        }
+
+        function drawAllRings() {
+            var dpr = window.devicePixelRatio || 1;
+            var maxRadius = ringRadii[7];
+            var viewScale = Math.min(window.innerWidth, window.innerHeight) * 0.75 / maxRadius;
+            var ringPx = maxRadius * viewScale;
+            var cssSize = Math.floor(ringPx * 2 + 24);
+            var pixelSize = Math.floor(cssSize * dpr);
+            var cx = cssSize / 2;
+            var cy = cssSize / 2;
+            var scale = viewScale;
+            var color = getTextColor();
+
+            for (var r = 0; r < 8; r++) {
+                var canvas = ringCanvases[r];
+                var ctx = ringCtxs[r];
+
+                canvas.width = pixelSize;
+                canvas.height = pixelSize;
+                canvas.style.width = cssSize + 'px';
+                canvas.style.height = cssSize + 'px';
+
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                ctx.clearRect(0, 0, cssSize, cssSize);
+
+                var radius = ringRadii[r] * scale;
+                var text = ringTexts[r];
+                var startOffset = ringStarts[r] / 100;
+
+                // Non-linear font scaling: inner rings stay small, outer rings balloon
+                var t = r / 7;                              // 0 (inner) → 1 (outer)
+                var fontCurve = Math.pow(t, 1.4);           // exponent >1 = outer-biased
+                var fontScale = 0.04 + fontCurve * 0.08;    // min 4% → max 12% of radius
+                var fontSize = Math.max(7, radius * fontScale);
+                ctx.font = fontSize + 'px "JetBrains Mono", "Courier New", monospace';
+                ctx.fillStyle = color;
+                ctx.globalAlpha = ringOpacities[r];
+                ctx.textBaseline = 'middle';
+                ctx.textAlign = 'center';
+
+                var charWidth = ctx.measureText('X').width * 1.15;
+                var circumference = 2 * Math.PI * radius;
+                var numChars = Math.floor(circumference / charWidth);
+
+                var fullText = '';
+                while (fullText.length < numChars) fullText += text;
+                fullText = fullText.substring(0, numChars);
+
+                var anglePerChar = (2 * Math.PI) / numChars;
+                var startAngle = startOffset * 2 * Math.PI - Math.PI / 2;
+
+                for (var j = 0; j < numChars; j++) {
+                    var angle = startAngle + j * anglePerChar;
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.rotate(angle);
+                    ctx.fillText(fullText[j], 0, -radius);
+                    ctx.restore();
+                }
+            }
+        }
+
+        drawAllRings();
+
+        // Redraw on theme change
+        var themeObserver = new MutationObserver(function() { drawAllRings(); });
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        // Redraw on resize (debounced)
+        var resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(drawAllRings, 250);
+        });
+
+        // ---- Mouse wheel → ring rotation (with inertia decay) ----
+        var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        document.addEventListener('wheel', function(e) {
+            if (reducedMotion) return;
+            e.preventDefault();
+            // deltaY > 0 = scroll down → clockwise (+), deltaY < 0 = scroll up → CCW (-)
+            var wd = e.deltaY * WHEEL_SCALE;
+            for (var i = 0; i < 8; i++) {
+                ringWheelBoost[i] += wd * ringSpeedMul[i];
+                // Clamp boost to prevent insane speeds
+                if (ringWheelBoost[i] > 3) ringWheelBoost[i] = 3;
+                if (ringWheelBoost[i] < -3) ringWheelBoost[i] = -3;
+            }
+        }, { passive: false });
+
+        // ---- Particles ----
+        var mx = window.innerWidth/2, my = window.innerHeight/2;
+        var cx = window.innerWidth/2, cy = window.innerHeight/2;
+        var particleEls = document.querySelectorAll('.particle');
+        var pData = [];
+        for (var i = 0; i < particleEls.length; i++) {
+            var s = getComputedStyle(particleEls[i]);
+            pData.push({
+                el: particleEls[i],
+                fracX: (parseFloat(s.left) || 0) / window.innerWidth,
+                fracY: (parseFloat(s.top) || 0) / window.innerHeight,
+                phase: Math.random() * Math.PI * 2,
+                period: 8 + Math.random() * 12,
+                ampX: 25 + Math.random() * 45,
+                ampY: 30 + Math.random() * 55,
+                opPhase: Math.random() * Math.PI * 2,
+                opPeriod: 5 + Math.random() * 8
+            });
+        }
+
+        document.addEventListener('mousemove', function(e) {
+            mx = e.clientX;
+            my = e.clientY;
+        });
+
+        // ---- Main loop ----
+
+        function loop(time) {
+            var t = time * 0.001;
+            var vw = window.innerWidth;
+            var vh = window.innerHeight;
+
+            cx += (mx - cx) * 0.08;
+            cy += (my - cy) * 0.08;
+
+            // Particles
+            for (var i = 0; i < pData.length; i++) {
+                var pd = pData[i];
+                var lt = t / pd.period;
+                var bx = pd.fracX * vw;
+                var by = pd.fracY * vh;
+                var driftX = Math.sin(lt * Math.PI * 2 + pd.phase) * pd.ampX;
+                var driftY = Math.cos(lt * Math.PI * 2 + pd.phase) * pd.ampY * 0.7 - pd.ampY * 0.3;
+                var dx = cx - (bx + driftX);
+                var dy = cy - (by + driftY);
+                var dist = Math.sqrt(dx*dx + dy*dy);
+                var mouseX = 0, mouseY = 0;
+                if (dist < 280) {
+                    var force = (1 - dist/280) * 18;
+                    mouseX = dx / Math.max(dist, 1) * force;
+                    mouseY = dy / Math.max(dist, 1) * force;
+                }
+                var op = 0.08 + Math.abs(Math.sin(t / pd.opPeriod * Math.PI * 2 + pd.opPhase)) * 0.55;
+                pd.el.style.transform = 'translate(' + (driftX + mouseX) + 'px, ' + (driftY + mouseY) + 'px)';
+                pd.el.style.opacity = op;
+            }
+
+            // Ring rotation: auto-rotate base + wheel boost (decays) + 3D depth
+            if (!reducedMotion) {
+                for (var i = 0; i < 8; i++) {
+                    // Wheel boost decays toward zero
+                    ringWheelBoost[i] *= FRICTION;
+                    if (Math.abs(ringWheelBoost[i]) < 0.0005) ringWheelBoost[i] = 0;
+
+                    // Total speed = auto-rotation base + wheel boost
+                    var totalSpeed = ringBaseSpeeds[i] + ringWheelBoost[i];
+
+                    ringAngles[i] = (ringAngles[i] + totalSpeed) % 360;
+
+                    // 3D depth via translateZ (no rotateX — rings face camera flat)
+                    // Outer rings pop closer to viewer, perspective makes them appear larger
+                    var z = ringZOffsets[i];
+                    ringCanvases[i].style.transform =
+                        'translate(-50%, -50%) translateZ(' + z + 'px) rotate(' + ringAngles[i] + 'deg)';
+                }
+            }
+
+            requestAnimationFrame(loop);
+        }
+        requestAnimationFrame(loop);
+    })();
+    </script>
+
+    <!-- Load friends from JSON config -->
+    <script>
+    (function() {
+        var grid = document.getElementById('friends-grid');
+        if (!grid) return;
+
+        fetch('friends.json')
+            .then(function(r) { return r.json(); })
+            .then(function(friends) {
+                grid.innerHTML = '';
+                friends.forEach(function(f) {
+                    var card = document.createElement('a');
+                    card.className = 'friend-card' + (f.link ? '' : ' friend-card-empty');
+                    if (f.link) { card.href = f.link; card.target = '_blank'; }
+
+                    var avatar = document.createElement('span');
+                    avatar.className = 'friend-avatar';
+                    if (f.avatar) {
+                        var img = document.createElement('img');
+                        img.src = f.avatar;
+                        img.alt = f.name;
+                        avatar.appendChild(img);
+                    } else {
+                        avatar.textContent = f.name.charAt(0);
+                    }
+
+                    var info = document.createElement('span');
+                    info.className = 'friend-info';
+                    info.innerHTML = '<span class="friend-name">'+f.name+'</span><span class="friend-desc">'+f.desc+'</span>';
+
+                    card.appendChild(avatar);
+                    card.appendChild(info);
+                    grid.appendChild(card);
+                });
+            })
+            .catch(function() {
+                // Fallback: show empty grid if JSON fails to load
+                grid.innerHTML = '<span style="color:var(--dim);font-size:0.7rem;">[ friends.json 加载失败 ]</span>';
+            });
+    })();
+    </script>
+
+    <!-- Welcome text decrypt scramble effect -->
+    <script>
+    (function() {
+        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*[]{}|;:<>?/';
+        function rchar() { return chars[Math.floor(Math.random()*chars.length)]; }
+
+        function scramble(el, finalText, duration, callback) {
+            if (!el) return;
+            var len = finalText.length;
+            var start = Date.now();
+            var iv = setInterval(function() {
+                var elapsed = Date.now() - start;
+                var progress = Math.min(elapsed / duration, 1);
+                // Ease-out: progress starts fast, slows down
+                var eased = 1 - Math.pow(1 - progress, 3);
+                var revealCount = Math.floor(eased * len);
+                var txt = '';
+                for (var i = 0; i < len; i++) {
+                    if (i < revealCount) {
+                        txt += finalText[i];
+                    } else {
+                        txt += rchar();
+                    }
+                }
+                el.textContent = txt;
+                if (progress >= 1) {
+                    clearInterval(iv);
+                    el.textContent = finalText;
+                    if (callback) callback();
+                }
+            }, 40);
+        }
+
+        function runWelcome() {
+            // Respect reduced motion
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                var els = document.querySelectorAll('.myself.slider-item h2, .myself.slider-item h3, .myself.slider-item p');
+                for (var i = 0; i < els.length; i++) {
+                    els[i].style.opacity = '1';
+                    els[i].style.clipPath = 'none';
+                }
+                return;
+            }
+
+            var h2 = document.querySelector('.myself.slider-item h2');
+            var h3 = document.querySelector('.myself.slider-item h3');
+            var p  = document.querySelector('.myself.slider-item p');
+
+            var h2Final = 'Welcome to My Laboratory';
+            var h3Final = '我的名字是 XhoI_Enzyme';
+            var pFinal  = '同时也是 Pedestrian';
+
+            if (h2) {
+                h2.style.opacity = '1';
+                h2.style.clipPath = 'none';
+                scramble(h2, h2Final, 800, function() {
+                    if (h3) {
+                        h3.style.opacity = '1';
+                        h3.style.clipPath = 'none';
+                        scramble(h3, h3Final, 700, function() {
+                            if (p) {
+                                p.style.opacity = '1';
+                                p.style.clipPath = 'none';
+                                scramble(p, pFinal, 500);
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        // Run on first visit only (sessionStorage)
+        var ran = sessionStorage.getItem('welcome-ran');
+        if (!ran) {
+            sessionStorage.setItem('welcome-ran', '1');
+            // Small delay to let CSS settle
+            setTimeout(runWelcome, 200);
+        } else {
+            // Already visited: show text normally without animation
+            var els = document.querySelectorAll('.myself.slider-item h2, .myself.slider-item h3, .myself.slider-item p');
+            for (var i = 0; i < els.length; i++) {
+                els[i].style.opacity = '1';
+                els[i].style.clipPath = 'none';
+            }
+        }
+    })();
+    </script>
+
+    <!-- Dynamic telemetry simulation + waveform -->
+    <script>
+    (function() {
+        var tempEl = document.getElementById('telem-temp');
+        var freqEl = document.getElementById('telem-freq');
+        var memEl  = document.getElementById('telem-mem');
+        var pktEl  = document.getElementById('telem-pkt');
+        var rxEl   = document.getElementById('telem-rx');
+        var txEl   = document.getElementById('telem-tx');
+        var r0El   = document.getElementById('telem-r0');
+        var r1El   = document.getElementById('telem-r1');
+        var r2El   = document.getElementById('telem-r2');
+        var msgEl  = document.getElementById('telem-msg');
+        var tsEl   = document.getElementById('telem-ts');
+        var tickerEl = document.getElementById('telem-ticker-text');
+        var waveCanvas = document.getElementById('telem-wave');
+
+        var pktCount = 12, rxCount = 45, txCount = 89;
+        var msgIdx = 0;
+        var msgs = ['SYS:NOMINAL','SYS:STABLE','SYS:READY','LINK:UP','LOOP:OK','WDT:CLEAR'];
+        var tickerMsgs = [
+            'COM3:115200 8N1 | RX:0x4F 0xB3 0x2A | ACK',
+            'COM3:115200 8N1 | TX:PKT#013 | DONE',
+            'COM3:115200 8N1 | SENSOR_0:36.5C | OK',
+            'COM3:115200 8N1 | MEM_DUMP:0xB7 | CRC:OK',
+            'COM3:115200 8N1 | WDT:RESET | BOOT:OK'
+        ];
+
+        function rhex(v) { return '0x' + ('0'+Math.min(255,Math.max(0,v|0)).toString(16).toUpperCase()).slice(-2); }
+        function ts() { var d=new Date(); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')+':'+d.getSeconds().toString().padStart(2,'0')+'.'+d.getMilliseconds().toString().padStart(3,'0'); }
+
+        // === Waveform canvas ===
+        var waveBuf = [];
+        var waveLen = 300;
+        for (var i=0; i<waveLen; i++) waveBuf.push(9); // flatline init
+
+        var waveAccent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#FF6B00';
+        window._waveAccent = waveAccent;
+
+        function drawWave() {
+            if (!waveCanvas) return;
+            var ctx = waveCanvas.getContext('2d');
+            var w = waveCanvas.width = waveCanvas.parentElement.clientWidth || 300;
+            waveCanvas.height = 18;
+            // Shift buffer left
+            waveBuf.push(9 + Math.sin(Date.now()/300)*5 + Math.sin(Date.now()/700)*3 + (Math.random()-0.5)*4);
+            if (waveBuf.length > w) waveBuf.shift();
+            // Draw
+            ctx.clearRect(0, 0, w, 18);
+            ctx.strokeStyle = window._waveAccent || waveAccent;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (var x = 0; x < waveBuf.length; x++) {
+                var y = waveBuf[x];
+                if (x===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            // Dim grid lines
+            ctx.strokeStyle = 'rgba(128,128,128,0.15)';
+            ctx.lineWidth = 0.5;
+            for (var gy=6; gy<=12; gy+=6) { ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(w,gy); ctx.stroke(); }
+        }
+
+        function update() {
+            if (tempEl) tempEl.textContent = (36.0 + Math.sin(Date.now()/8000)*0.6 + (Math.random()-0.5)*0.4).toFixed(1);
+            if (freqEl) freqEl.textContent = (60.0 + Math.sin(Date.now()/6000)*0.3 + (Math.random()-0.5)*0.2).toFixed(1);
+            if (memEl)  memEl.textContent  = rhex(180 + Math.sin(Date.now()/5000)*15 + (Math.random()-0.5)*5);
+            if (r0El)   r0El.textContent   = rhex(75 + Math.sin(Date.now()/7000)*10 + (Math.random()-0.5)*4);
+            if (r1El)   r1El.textContent   = rhex(175 + Math.sin(Date.now()/9000)*20 + (Math.random()-0.5)*8);
+            if (r2El)   r2El.textContent   = rhex(40 + Math.sin(Date.now()/11000)*8 + (Math.random()-0.5)*6);
+            if (pktEl) { if(Math.random()<0.2) pktCount=(pktCount+1)%1000; pktEl.textContent=String(pktCount).padStart(3,'0'); }
+            if (rxEl)  { if(Math.random()<0.25) rxCount=(rxCount+1)%1000; rxEl.textContent=String(rxCount).padStart(3,'0'); }
+            if (txEl)  { if(Math.random()<0.2) txCount=(txCount+1)%1000; txEl.textContent=String(txCount).padStart(3,'0'); }
+            if (msgEl) { if(Math.random()<0.1) msgEl.textContent=msgs[Math.floor(Math.random()*msgs.length)]; }
+            if (tsEl)  { tsEl.textContent = ts(); }
+            // Ticker: cycle through messages
+            if (tickerEl && Math.random()<0.05) {
+                msgIdx = (msgIdx+1) % tickerMsgs.length;
+                tickerEl.textContent = tickerMsgs[msgIdx];
+            }
+        }
+
+        setInterval(update, 2200);
+        setInterval(drawWave, 80);
+        update();
+        drawWave();
+    })();
+    </script>
+
+    <!-- Toolbox dropdown toggle -->
+    <script>
+    (function() {
+        var btn = document.getElementById('toolbox-btn');
+        var dropdown = document.getElementById('toolbox-dropdown');
+        if (!btn || !dropdown) return;
+
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('open');
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') dropdown.classList.remove('open');
+        });
+
+        // Close when a tool link is clicked
+        dropdown.querySelectorAll('a').forEach(function(a) {
+            a.addEventListener('click', function() {
+                dropdown.classList.remove('open');
+            });
+        });
+    })();
+    </script>
+
+    <!-- Theme toggle logic -->
+    <script>
+    (function() {
+        var html = document.documentElement;
+        var toggleBtn = document.getElementById('theme-toggle');
+        var transTimer = null;
+
+        function setTheme(mode) {
+            // Briefly enable transitions for smooth color change
+            document.body.classList.add('theme-transitioning');
+            clearTimeout(transTimer);
+            transTimer = setTimeout(function() {
+                document.body.classList.remove('theme-transitioning');
+            }, 200);
+
+            if (mode === 'light') {
+                html.classList.add('light');
+                html.classList.remove('dark');
+                if (toggleBtn) toggleBtn.textContent = '[DARK]';
+                try { localStorage.setItem('theme', 'light'); } catch(e) {}
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                if (toggleBtn) toggleBtn.textContent = '[LIGHT]';
+                try { localStorage.setItem('theme', 'dark'); } catch(e) {}
+            }
+
+            // Update waveform accent color cache
+            try {
+                window._waveAccent = getComputedStyle(html).getPropertyValue('--accent').trim();
+            } catch(e) {}
+        }
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                setTheme(html.classList.contains('light') ? 'dark' : 'light');
+            });
+        }
+
+        // Initial: head script already set the class, just sync button text + accent
+        var current = html.classList.contains('light') ? 'light' : 'dark';
+        if (toggleBtn) toggleBtn.textContent = current === 'light' ? '[DARK]' : '[LIGHT]';
+        try { window._waveAccent = getComputedStyle(html).getPropertyValue('--accent').trim(); } catch(e) {}
+    })();
+    </script>
+</body>
+</html>

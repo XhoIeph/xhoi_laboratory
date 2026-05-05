@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>串口助手 // 工具箱</title>
+    <script>
+    (function(){var t='light';try{t=localStorage.getItem('theme')||'light'}catch(e){}document.documentElement.className=t;})();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <button class="menu" aria-expanded="false" aria-controls="main-nav">&#9776;</button>
+        <div class="header-left-group">
+            <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+                <svg class="header-logo-icon" viewBox="0 0 48 48" width="36" height="36">
+                    <polygon points="24,2 44,24 24,46 4,24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.8"/>
+                    <polygon points="24,12 35,24 24,36 13,24" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+                    <line x1="13" y1="12" x2="35" y2="36" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
+                    <line x1="35" y1="12" x2="13" y2="36" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
+                    <circle cx="24" cy="2" r="2.8" fill="currentColor" opacity="0.85"/>
+                    <circle cx="44" cy="24" r="2.8" fill="currentColor" opacity="0.85"/>
+                    <circle cx="24" cy="46" r="2.8" fill="currentColor" opacity="0.85"/>
+                    <circle cx="4" cy="24" r="2.8" fill="currentColor" opacity="0.85"/>
+                </svg>
+                <div class="header-title-block">
+                    <span class="header-title-zh">生物酶实验室</span>
+                    <span class="header-title-en">ENZYME LABORATORY</span>
+                </div>
+            </a>
+            <span class="header-vdivider"></span>
+            <span class="info-line-sub" style="white-space:nowrap;">// SERIAL</span>
+        </div>
+        <ul id="main-nav">
+            <li><a href="index.html">[HOME]</a></li>
+            <li><a href="https://space.bilibili.com/179241918" target="_blank">[BILIBILI]</a></li>
+            <li><button id="theme-toggle">[LIGHT]</button></li>
+        </ul>
+    </header>
+
+    <main class="tool-main serial-main">
+        <h2>串口助手</h2>
+        <p class="tool-subtitle">Serial Monitor // Web Serial API // TransformStream</p>
+
+        <!-- ====== Row 1: Config ====== -->
+        <div class="serial-section">
+            <div class="serial-section-header">
+                <span class="section-dot" id="status-dot"></span>
+                <span class="section-title">CONFIG</span>
+                <span class="serial-status" id="serial-status">DISCONNECTED</span>
+                <button id="serial-connect" class="serial-btn">[ CONNECT ]</button>
+                <button id="serial-refresh" class="serial-btn serial-btn-sm" style="display:none">[ REFRESH ]</button>
+            </div>
+            <div class="serial-section-body">
+                <span class="serial-opt-label">Baud</span>
+                <select id="serial-baud" class="serial-select">
+                    <option value="300">300</option><option value="600">600</option>
+                    <option value="1200">1200</option><option value="2400">2400</option>
+                    <option value="4800">4800</option><option value="9600">9600</option>
+                    <option value="14400">14400</option><option value="19200">19200</option>
+                    <option value="38400">38400</option><option value="56000">56000</option>
+                    <option value="57600">57600</option><option value="115200" selected>115200</option>
+                    <option value="230400">230400</option><option value="460800">460800</option>
+                    <option value="921600">921600</option>
+                    <option value="custom">CUSTOM</option>
+                </select>
+                <input type="number" id="serial-baud-custom" class="serial-input-sm" placeholder="波特率" value="115200" min="1" max="12000000" style="display:none">
+
+                <span class="serial-opt-label">Data</span>
+                <select id="serial-databits" class="serial-select serial-select-sm">
+                    <option value="8" selected>8</option><option value="7">7</option><option value="6">6</option><option value="5">5</option>
+                </select>
+
+                <span class="serial-opt-label">Stop</span>
+                <select id="serial-stopbits" class="serial-select serial-select-sm">
+                    <option value="1" selected>1</option><option value="1.5">1.5</option><option value="2">2</option>
+                </select>
+
+                <span class="serial-opt-label">Parity</span>
+                <select id="serial-parity" class="serial-select serial-select-sm">
+                    <option value="none" selected>N</option><option value="even">E</option><option value="odd">O</option>
+                </select>
+
+                <span class="serial-opt-label">Flow</span>
+                <select id="serial-flow" class="serial-select serial-select-sm">
+                    <option value="none" selected>NONE</option><option value="hardware">RTS/CTS</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ====== Row 2: Send ====== -->
+        <div class="serial-section">
+            <div class="serial-section-header">
+                <span class="section-dot"></span>
+                <span class="section-title">TX >> SEND</span>
+                <label class="serial-check"><input type="checkbox" id="serial-hex-send">HEX</label>
+                <label class="serial-check"><input type="checkbox" id="serial-crlf">+CRLF</label>
+                <span class="serial-opt-label">定时</span>
+                <input type="number" id="serial-interval" class="serial-interval" value="1000" min="20" step="50">
+                <span class="serial-send-label">ms</span>
+                <button id="serial-auto-send" class="serial-btn serial-btn-sm">[ AUTO ]</button>
+            </div>
+            <div class="serial-section-body" style="flex-direction:column;align-items:stretch;gap:4px;">
+                <div class="serial-send-slot" id="send-slot-0">
+                    <span class="serial-slot-num">01</span>
+                    <input type="text" class="serial-send-input" data-slot="0" placeholder="发送数据... Enter发送" spellcheck="false">
+                    <button class="serial-btn serial-btn-sm serial-slot-send" data-slot="0">SEND</button>
+                </div>
+                <div class="serial-send-slot" id="send-slot-1">
+                    <span class="serial-slot-num">02</span>
+                    <input type="text" class="serial-send-input" data-slot="1" placeholder="发送数据..." spellcheck="false">
+                    <button class="serial-btn serial-btn-sm serial-slot-send" data-slot="1">SEND</button>
+                </div>
+                <div class="serial-send-slot" id="send-slot-2">
+                    <span class="serial-slot-num">03</span>
+                    <input type="text" class="serial-send-input" data-slot="2" placeholder="发送数据..." spellcheck="false">
+                    <button class="serial-btn serial-btn-sm serial-slot-send" data-slot="2">SEND</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== Row 3: Preset commands ====== -->
+        <div class="serial-section">
+            <div class="serial-section-header">
+                <span class="section-dot"></span>
+                <span class="section-title">QUICK SEND // 快捷指令</span>
+                <button id="preset-add" class="serial-btn serial-btn-sm">[ + ]</button>
+            </div>
+            <div class="serial-section-body" id="preset-grid" style="padding:8px 16px;gap:6px;">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- ====== Row 4: Receive ====== -->
+        <div class="serial-section" style="margin-bottom:0">
+            <div class="serial-section-header">
+                <span class="section-dot"></span>
+                <span class="section-title">RX &lt;&lt; RECEIVE</span>
+                <span class="serial-rx-label">RX:</span><span id="serial-rx-count">0</span><span>B</span>
+                <span class="serial-rx-label" style="margin-left:8px">TX:</span><span id="serial-tx-count">0</span><span>B</span>
+                <button id="serial-clear" class="serial-btn serial-btn-sm">[ CLEAR ]</button>
+                <label class="serial-check"><input type="checkbox" id="serial-hex-display">HEX</label>
+                <label class="serial-check"><input type="checkbox" id="serial-timestamp">TS</label>
+                <label class="serial-check"><input type="checkbox" id="serial-autoscroll" checked>SCROLL</label>
+                <button id="serial-export" class="serial-btn serial-btn-sm">[ EXPORT ]</button>
+            </div>
+            <div class="serial-rx-area">
+                <pre class="serial-rx" id="serial-rx"></pre>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/main.js"></script>
+    <script>
+    (function() {
+        // ================================================================
+        // DOM refs
+        // ================================================================
+        var connectBtn   = document.getElementById('serial-connect');
+        var refreshBtn   = document.getElementById('serial-refresh');
+        var statusEl     = document.getElementById('serial-status');
+        var statusDot    = document.getElementById('status-dot');
+        var rxEl         = document.getElementById('serial-rx');
+        var rxCountEl    = document.getElementById('serial-rx-count');
+        var txCountEl    = document.getElementById('serial-tx-count');
+        var clearBtn     = document.getElementById('serial-clear');
+        var exportBtn    = document.getElementById('serial-export');
+        var autoSendBtn  = document.getElementById('serial-auto-send');
+        var presetGrid   = document.getElementById('preset-grid');
+        var presetAddBtn = document.getElementById('preset-add');
+
+        var baudSelect   = document.getElementById('serial-baud');
+        var baudCustom   = document.getElementById('serial-baud-custom');
+        var dataSelect   = document.getElementById('serial-databits');
+        var stopSelect   = document.getElementById('serial-stopbits');
+        var paritySelect = document.getElementById('serial-parity');
+        var flowSelect   = document.getElementById('serial-flow');
+
+        var hexSendChk    = document.getElementById('serial-hex-send');
+        var crlfChk       = document.getElementById('serial-crlf');
+        var hexDisplayChk = document.getElementById('serial-hex-display');
+        var timestampChk  = document.getElementById('serial-timestamp');
+        var autoscrollChk = document.getElementById('serial-autoscroll');
+        var intervalInput = document.getElementById('serial-interval');
+
+        // ================================================================
+        // State
+        // ================================================================
+        var port         = null;
+        var writer       = null;
+        var readAbort    = null;    // AbortController for read loop
+        var connected    = false;
+        var connecting   = false;
+        var autoSendTimer = null;
+        var rxBytes      = 0;
+        var txBytes      = 0;
+        var rxBuffer     = [];      // pending log lines
+        var flushScheduled = false; // rAF gate
+        var MAX_LOG_LINES = 2000;
+
+        // ================================================================
+        // Web Serial check
+        // ================================================================
+        if (!('serial' in navigator)) {
+            connectBtn.textContent = '[ UNSUPPORTED ]';
+            connectBtn.disabled = true;
+            statusEl.textContent = 'NO_SERIAL_API';
+            setStatusColor('error');
+            rxEl.textContent = '// 浏览器不支持 Web Serial API\n// 请使用 Chrome 89+ / Edge 89+ / Opera 75+\n';
+        }
+
+        function setStatusColor(state) {
+            statusDot.style.background = state === 'connected' ? 'var(--accent-teal)'
+                : state === 'error' ? 'var(--accent)' : 'var(--dim)';
+        }
+        setStatusColor('disconnected');
+
+        // ================================================================
+        // Custom baud rate
+        // ================================================================
+        baudSelect.addEventListener('change', function() {
+            baudCustom.style.display = baudSelect.value === 'custom' ? '' : 'none';
+            if (baudSelect.value === 'custom') baudCustom.focus();
+        });
+
+        function getBaudRate() {
+            if (baudSelect.value === 'custom') return parseInt(baudCustom.value) || 115200;
+            return parseInt(baudSelect.value);
+        }
+
+        // ================================================================
+        // Connect / Disconnect
+        // ================================================================
+        connectBtn.addEventListener('click', function() {
+            if (connected) { disconnect(); return; }
+            connect();
+        });
+
+        async function connect() {
+            if (connecting || connected) return;
+            connecting = true;
+            connectBtn.textContent = '[...]';
+            connectBtn.disabled = true;
+            statusEl.textContent = 'CONNECTING...';
+
+            try {
+                port = await navigator.serial.requestPort();
+                await port.open({
+                    baudRate: getBaudRate(),
+                    dataBits: parseInt(dataSelect.value),
+                    stopBits: parseFloat(stopSelect.value),
+                    parity: paritySelect.value,
+                    flowControl: flowSelect.value === 'hardware' ? 'hardware' : 'none'
+                });
+
+                var info = getBaudRate() + ' ' + dataSelect.value
+                    + paritySelect.value[0].toUpperCase() + stopSelect.value
+                    + (flowSelect.value === 'hardware' ? ' RTS/CTS' : '');
+
+                statusEl.textContent = 'CONNECTED ' + info;
+                setStatusColor('connected');
+                connectBtn.textContent = '[ DISCONNECT ]';
+                connectBtn.classList.add('serial-btn-active');
+                connectBtn.disabled = false;
+                connected = true;
+                connecting = false;
+
+                baudSelect.disabled = true;
+                baudCustom.disabled = true;
+                dataSelect.disabled = true;
+                stopSelect.disabled = true;
+                paritySelect.disabled = true;
+                flowSelect.disabled = true;
+
+                writer = port.writable.getWriter();
+                startReading();
+            } catch(e) {
+                connecting = false;
+                connectBtn.textContent = '[ CONNECT ]';
+                connectBtn.disabled = false;
+                if (e.message.indexOf('cancelled') === -1) {
+                    statusEl.textContent = 'ERR: ' + e.message;
+                    setStatusColor('error');
+                } else {
+                    statusEl.textContent = 'DISCONNECTED';
+                }
+                port = null;
+            }
+        }
+
+        async function disconnect() {
+            connected = false;
+            await stopReading();
+
+            if (autoSendTimer) stopAutoSend();
+
+            if (writer) {
+                try { writer.releaseLock(); } catch(e) {}
+                writer = null;
+            }
+            if (port) {
+                try { await port.close(); } catch(e) {}
+                port = null;
+            }
+
+            statusEl.textContent = 'DISCONNECTED';
+            setStatusColor('disconnected');
+            connectBtn.textContent = '[ CONNECT ]';
+            connectBtn.classList.remove('serial-btn-active');
+            connectBtn.disabled = false;
+            connecting = false;
+
+            baudSelect.disabled = false;
+            baudCustom.disabled = false;
+            dataSelect.disabled = false;
+            stopSelect.disabled = false;
+            paritySelect.disabled = false;
+            flowSelect.disabled = false;
+        }
+
+        // ================================================================
+        // Reading — TransformStream pipeline for high performance
+        // ================================================================
+        async function startReading() {
+            readAbort = new AbortController();
+
+            var ts = new TransformStream({
+                transform(chunk, controller) {
+                    // Push raw bytes downstream — processing is cheap here
+                    controller.enqueue(chunk);
+                }
+            });
+
+            // Pipe the serial readable through a no-op TransformStream.
+            // This gives us a clean ReadableStream to consume while keeping
+            // the pipe open for cancellation via abort.
+            var readable = port.readable;
+
+            // Manual read loop — Web Serial doesn't support pipeThrough directly
+            // on all platforms reliably. Use getReader with abort signal.
+            var loopReader = readable.getReader();
+
+            try {
+                while (connected) {
+                    var result;
+                    try {
+                        result = await Promise.race([
+                            loopReader.read(),
+                            new Promise(function(_, reject) {
+                                readAbort.signal.addEventListener('abort', function() {
+                                    reject(new Error('ABORT'));
+                                });
+                            })
+                        ]);
+                    } catch(e) {
+                        if (e.message === 'ABORT') break;
+                        throw e;
+                    }
+
+                    if (result.done) break;
+                    processRxData(result.value);
+                }
+            } catch(e) {
+                if (connected) {
+                    appendLog('// READ ERR: ' + e.message, 'system');
+                    flushLog();
+                }
+            } finally {
+                try { loopReader.releaseLock(); } catch(e) {}
+            }
+        }
+
+        async function stopReading() {
+            if (readAbort) { readAbort.abort(); readAbort = null; }
+            // Small delay to let the read loop unwind
+            await new Promise(function(r) { setTimeout(r, 50); });
+        }
+
+        // ================================================================
+        // Data processing — batched rAF rendering
+        // ================================================================
+        function processRxData(data) {
+            rxBytes += data.length;
+            rxCountEl.textContent = rxBytes;
+
+            var prefix = timestampChk.checked ? tsPrefix() : '';
+
+            if (hexDisplayChk.checked) {
+                var parts = [];
+                for (var i = 0; i < data.length; i++) {
+                    parts.push(data[i].toString(16).toUpperCase().padStart(2,'0'));
+                }
+                appendLog(prefix + parts.join(' '), 'rx');
+            } else {
+                var text = new TextDecoder().decode(data);
+                // Split multi-line for readability
+                var lines = text.split('\n');
+                for (var i = 0; i < lines.length; i++) {
+                    if (lines[i] || i < lines.length - 1) {
+                        appendLog(prefix + lines[i], 'rx');
+                    }
+                }
+            }
+        }
+
+        function appendLog(text, kind) {
+            if (text === '' || text === undefined) return;
+            var entry = { text: text, kind: kind || 'rx' };
+            rxBuffer.push(entry);
+            if (rxBuffer.length > MAX_LOG_LINES) rxBuffer.shift();
+            scheduleFlush();
+        }
+
+        function scheduleFlush() {
+            if (flushScheduled) return;
+            flushScheduled = true;
+            requestAnimationFrame(flushLog);
+        }
+
+        function flushLog() {
+            flushScheduled = false;
+            if (rxBuffer.length === 0) return;
+
+            var fragment = document.createDocumentFragment();
+            for (var i = 0; i < rxBuffer.length; i++) {
+                var entry = rxBuffer[i];
+                var span = document.createElement('span');
+                span.textContent = entry.text + '\n';
+                span.className = 'log-' + entry.kind;
+                fragment.appendChild(span);
+            }
+            rxBuffer.length = 0;
+            rxEl.appendChild(fragment);
+
+            if (autoscrollChk.checked) rxEl.scrollTop = rxEl.scrollHeight;
+        }
+
+        function tsPrefix() {
+            var d = new Date();
+            return '[' +
+                d.getHours().toString().padStart(2,'0') + ':' +
+                d.getMinutes().toString().padStart(2,'0') + ':' +
+                d.getSeconds().toString().padStart(2,'0') + '.' +
+                d.getMilliseconds().toString().padStart(3,'0') + '] ';
+        }
+
+        // ================================================================
+        // Sending with HEX validation + TX echo
+        // ================================================================
+        function validateHex(str) {
+            var cleaned = str.replace(/[\s,;|]/g, '');
+            return /^[0-9a-fA-F]*$/.test(cleaned) ? cleaned : null;
+        }
+
+        function buildPacket(text) {
+            if (!text) return null;
+            var bytes;
+            if (hexSendChk.checked) {
+                var cleaned = validateHex(text);
+                if (cleaned === null || cleaned === '') return null;
+                if (cleaned.length % 2) cleaned = '0' + cleaned;
+                bytes = new Uint8Array(cleaned.length / 2);
+                for (var i = 0; i < cleaned.length; i += 2) {
+                    bytes[i/2] = parseInt(cleaned.substr(i, 2), 16);
+                }
+            } else {
+                if (crlfChk.checked) text += '\r\n';
+                bytes = new TextEncoder().encode(text);
+            }
+            return bytes;
+        }
+
+        function doSend(inputEl) {
+            var raw = inputEl.value;
+            if (!raw) return;
+            var bytes = buildPacket(raw);
+            if (!bytes) {
+                // Flash the input to indicate invalid HEX
+                inputEl.style.borderColor = 'var(--accent)';
+                setTimeout(function() { inputEl.style.borderColor = ''; }, 300);
+                return;
+            }
+
+            // TX echo in log
+            var echo = (hexSendChk.checked ? '[TX HEX] ' : '[TX] ') + raw;
+            if (crlfChk.checked && !hexSendChk.checked) echo += '\\r\\n';
+            appendLog(echo, 'tx');
+            flushLog();
+
+            txBytes += bytes.length;
+            txCountEl.textContent = txBytes;
+
+            // Save to send history
+            saveSendHistory(raw);
+            sendData(bytes);
+        }
+
+        async function sendData(data) {
+            if (!port || !writer) return;
+            try { await writer.write(data); } catch(e) {
+                appendLog('// TX ERR: ' + e.message, 'system');
+                flushLog();
+            }
+        }
+
+        // Send history (localStorage)
+        var sendHistory = [];
+        try { sendHistory = JSON.parse(localStorage.getItem('serial-send-history') || '[]'); } catch(e) {}
+        if (sendHistory.length > 50) sendHistory = sendHistory.slice(-50);
+
+        function saveSendHistory(text) {
+            if (sendHistory.length === 0 || sendHistory[sendHistory.length-1] !== text) {
+                sendHistory.push(text);
+                if (sendHistory.length > 50) sendHistory.shift();
+                try { localStorage.setItem('serial-send-history', JSON.stringify(sendHistory)); } catch(e) {}
+            }
+        }
+
+        // Wire send slots
+        var activeSlot = 0;
+        var historyIdx = sendHistory.length;
+
+        document.querySelectorAll('.serial-send-input').forEach(function(input) {
+            var slot = parseInt(input.getAttribute('data-slot'));
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') { e.preventDefault(); activeSlot = slot; doSend(input); }
+                if (e.key === 'ArrowUp')   { e.preventDefault(); historyIdx = Math.max(0, historyIdx - 1); input.value = sendHistory[historyIdx] || ''; }
+                if (e.key === 'ArrowDown') { e.preventDefault(); historyIdx = Math.min(sendHistory.length, historyIdx + 1); input.value = historyIdx < sendHistory.length ? sendHistory[historyIdx] : ''; }
+            });
+            input.addEventListener('focus', function() { activeSlot = slot; historyIdx = sendHistory.length; });
+        });
+
+        document.querySelectorAll('.serial-slot-send').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var slot = parseInt(btn.getAttribute('data-slot'));
+                var input = document.querySelector('.serial-send-input[data-slot="' + slot + '"]');
+                if (input) doSend(input);
+            });
+        });
+
+        // ================================================================
+        // Auto send
+        // ================================================================
+        function stopAutoSend() {
+            if (autoSendTimer) { clearInterval(autoSendTimer); autoSendTimer = null; }
+            autoSendBtn.textContent = '[ AUTO ]';
+            autoSendBtn.classList.remove('serial-btn-active');
+        }
+
+        autoSendBtn.addEventListener('click', function() {
+            if (autoSendTimer) { stopAutoSend(); return; }
+            var ms = parseInt(intervalInput.value) || 1000;
+            if (ms < 20) ms = 20;
+            autoSendTimer = setInterval(function() {
+                var input = document.querySelector('.serial-send-input[data-slot="' + activeSlot + '"]');
+                if (input && input.value) doSend(input);
+            }, ms);
+            autoSendBtn.textContent = '[ STOP ]';
+            autoSendBtn.classList.add('serial-btn-active');
+        });
+
+        // ================================================================
+        // Preset commands (localStorage persisted)
+        // ================================================================
+        var presets = [];
+        try { presets = JSON.parse(localStorage.getItem('serial-presets') || '[]'); } catch(e) {}
+        if (presets.length === 0) {
+            presets = [
+                { label: 'AT',    data: 'AT\r\n' },
+                { label: 'AT+GMR', data: 'AT+GMR\r\n' },
+                { label: 'AT+RST', data: 'AT+RST\r\n' },
+                { label: 'ping',  data: 'ping\r\n' }
+            ];
+        }
+
+        function savePresets() {
+            try { localStorage.setItem('serial-presets', JSON.stringify(presets)); } catch(e) {}
+        }
+
+        function renderPresets() {
+            var html = '';
+            for (var i = 0; i < presets.length; i++) {
+                var p = presets[i];
+                html += '<div class="preset-item">' +
+                    '<button class="preset-send" data-idx="' + i + '">' + escapeHtml(p.label) + '</button>' +
+                    '<button class="preset-del" data-idx="' + i + '" title="删除">x</button>' +
+                '</div>';
+            }
+            html += '<div class="preset-item preset-add-item">' +
+                '<input type="text" class="preset-label-input" placeholder="标签" maxlength="10">' +
+                '<input type="text" class="preset-data-input" placeholder="数据">' +
+                '<button class="serial-btn serial-btn-sm preset-confirm-add">ADD</button>' +
+            '</div>';
+            presetGrid.innerHTML = html;
+
+            // Wire send buttons
+            presetGrid.querySelectorAll('.preset-send').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var idx = parseInt(btn.getAttribute('data-idx'));
+                    var data = presets[idx].data;
+                    // Send directly without going through send slot
+                    var bytes;
+                    if (hexSendChk.checked) {
+                        var cleaned = validateHex(data);
+                        if (!cleaned) return;
+                        if (cleaned.length % 2) cleaned = '0' + cleaned;
+                        bytes = new Uint8Array(cleaned.length / 2);
+                        for (var j = 0; j < cleaned.length; j += 2) bytes[j/2] = parseInt(cleaned.substr(j,2), 16);
+                    } else {
+                        bytes = new TextEncoder().encode(data);
+                    }
+                    appendLog('[TX PRESET] ' + data, 'tx');
+                    flushLog();
+                    txBytes += bytes.length;
+                    txCountEl.textContent = txBytes;
+                    sendData(bytes);
+                });
+            });
+
+            // Wire delete buttons
+            presetGrid.querySelectorAll('.preset-del').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var idx = parseInt(btn.getAttribute('data-idx'));
+                    presets.splice(idx, 1);
+                    savePresets();
+                    renderPresets();
+                });
+            });
+
+            // Wire add button
+            var confirmBtn = presetGrid.querySelector('.preset-confirm-add');
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', function() {
+                    var labelInput = presetGrid.querySelector('.preset-label-input');
+                    var dataInput = presetGrid.querySelector('.preset-data-input');
+                    var label = labelInput.value.trim();
+                    var data = dataInput.value.trim();
+                    if (!label || !data) return;
+                    presets.push({ label: label, data: data });
+                    savePresets();
+                    renderPresets();
+                });
+            }
+        }
+
+        presetAddBtn.addEventListener('click', function() {
+            // Scroll to the add row
+            var addRow = presetGrid.querySelector('.preset-add-item');
+            if (addRow) addRow.scrollIntoView({ behavior: 'smooth' });
+            var labelInput = presetGrid.querySelector('.preset-label-input');
+            if (labelInput) labelInput.focus();
+        });
+
+        renderPresets();
+
+        // ================================================================
+        // Clear + Export
+        // ================================================================
+        clearBtn.addEventListener('click', function() {
+            rxEl.textContent = '';
+            rxBytes = 0;
+            rxCountEl.textContent = '0';
+            // Don't reset TX counter on clear
+        });
+
+        exportBtn.addEventListener('click', function() {
+            var text = rxEl.textContent || '';
+            if (!text) return;
+            var blob = new Blob([text], { type: 'text/plain' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            var d = new Date();
+            a.download = 'serial-' +
+                d.getFullYear() +
+                (d.getMonth()+1).toString().padStart(2,'0') +
+                d.getDate().toString().padStart(2,'0') + '-' +
+                d.getHours().toString().padStart(2,'0') +
+                d.getMinutes().toString().padStart(2,'0') +
+                d.getSeconds().toString().padStart(2,'0') + '.log';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // ================================================================
+        // Device disconnect
+        // ================================================================
+        if (navigator.serial) {
+            navigator.serial.addEventListener('disconnect', function() {
+                appendLog('// --- DEVICE DISCONNECTED ---', 'system');
+                flushLog();
+                disconnect();
+            });
+        }
+
+        // ================================================================
+        // Theme toggle
+        // ================================================================
+        (function() {
+            var html = document.documentElement;
+            var btn = document.getElementById('theme-toggle');
+            var timer = null;
+            function setTheme(mode) {
+                document.body.classList.add('theme-transitioning');
+                clearTimeout(timer);
+                timer = setTimeout(function() { document.body.classList.remove('theme-transitioning'); }, 200);
+                if (mode === 'light') {
+                    html.classList.add('light'); html.classList.remove('dark');
+                    if (btn) btn.textContent = '[DARK]';
+                    try { localStorage.setItem('theme', 'light'); } catch(e) {}
+                } else {
+                    html.classList.remove('light'); html.classList.add('dark');
+                    if (btn) btn.textContent = '[LIGHT]';
+                    try { localStorage.setItem('theme', 'dark'); } catch(e) {}
+                }
+            }
+            if (btn) { btn.addEventListener('click', function() { setTheme(html.classList.contains('light')?'dark':'light'); }); }
+            var cur = html.classList.contains('light') ? 'light' : 'dark';
+            if (btn) btn.textContent = cur === 'light' ? '[DARK]' : '[LIGHT]';
+        })();
+
+        function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    })();
+    </script>
+</body>
+</html>

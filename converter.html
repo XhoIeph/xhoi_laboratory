@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>进制转换 // 工具箱</title>
+    <script>
+    (function(){var t='light';try{t=localStorage.getItem('theme')||'light'}catch(e){}document.documentElement.className=t;})();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <button class="menu" aria-expanded="false" aria-controls="main-nav">&#9776;</button>
+        <div class="header-left-group">
+            <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+                <svg class="header-logo-icon" viewBox="0 0 48 48" width="36" height="36">
+                    <polygon points="24,2 44,24 24,46 4,24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.8"/>
+                    <polygon points="24,12 35,24 24,36 13,24" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+                    <line x1="13" y1="12" x2="35" y2="36" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
+                    <line x1="35" y1="12" x2="13" y2="36" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
+                    <circle cx="24" cy="2" r="2.8" fill="currentColor" opacity="0.85"/>
+                    <circle cx="44" cy="24" r="2.8" fill="currentColor" opacity="0.85"/>
+                    <circle cx="24" cy="46" r="2.8" fill="currentColor" opacity="0.85"/>
+                    <circle cx="4" cy="24" r="2.8" fill="currentColor" opacity="0.85"/>
+                    <circle cx="24" cy="24" r="2.2" fill="currentColor" opacity="0.6"/>
+                </svg>
+                <div class="header-title-block">
+                    <span class="header-title-zh">生物酶实验室</span>
+                    <span class="header-title-en">ENZYME LABORATORY</span>
+                </div>
+            </a>
+            <span class="header-vdivider"></span>
+            <span class="info-line-sub" style="white-space:nowrap;">// CONVERTER</span>
+        </div>
+        <ul id="main-nav">
+            <li><a href="index.html">[HOME]</a></li>
+            <li><a href="https://space.bilibili.com/179241918" target="_blank">[BILIBILI]</a></li>
+            <li><button id="theme-toggle">[LIGHT]</button></li>
+        </ul>
+    </header>
+
+    <main class="tool-main">
+        <h2>进制转换</h2>
+        <p class="tool-subtitle">Base Converter // 0x</p>
+
+        <div class="converter-grid">
+            <!-- Input row -->
+            <div class="conv-row conv-row-input">
+                <span class="conv-label conv-label-input">INPUT</span>
+                <input type="text" id="conv-input" class="conv-input" placeholder="输入数值..." autofocus>
+            </div>
+
+            <!-- Base rows -->
+            <div class="conv-row">
+                <span class="conv-label">HEX</span>
+                <span class="conv-prefix">0x</span>
+                <input type="text" id="conv-hex" class="conv-field" readonly>
+                <button class="conv-copy" data-target="conv-hex" title="复制">&#9632;</button>
+            </div>
+            <div class="conv-row">
+                <span class="conv-label">DEC</span>
+                <span class="conv-prefix"></span>
+                <input type="text" id="conv-dec" class="conv-field" readonly>
+                <button class="conv-copy" data-target="conv-dec" title="复制">&#9632;</button>
+            </div>
+            <div class="conv-row">
+                <span class="conv-label">OCT</span>
+                <span class="conv-prefix">0o</span>
+                <input type="text" id="conv-oct" class="conv-field" readonly>
+                <button class="conv-copy" data-target="conv-oct" title="复制">&#9632;</button>
+            </div>
+            <div class="conv-row">
+                <span class="conv-label">BIN</span>
+                <span class="conv-prefix">0b</span>
+                <input type="text" id="conv-bin" class="conv-field" readonly>
+                <button class="conv-copy" data-target="conv-bin" title="复制">&#9632;</button>
+            </div>
+
+            <!-- Bit width selector -->
+            <div class="conv-row conv-row-opts">
+                <span class="conv-label">BITS</span>
+                <label class="conv-radio"><input type="radio" name="bits" value="8">8</label>
+                <label class="conv-radio"><input type="radio" name="bits" value="16" checked>16</label>
+                <label class="conv-radio"><input type="radio" name="bits" value="32">32</label>
+                <label class="conv-radio"><input type="radio" name="bits" value="64">64</label>
+            </div>
+
+            <!-- Bit breakdown display -->
+            <div class="conv-row conv-row-bits">
+                <span class="conv-label">BITMAP</span>
+                <div class="conv-bitmap" id="conv-bitmap"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/main.js"></script>
+    <script>
+    (function() {
+        var input = document.getElementById('conv-input');
+        var hex = document.getElementById('conv-hex');
+        var dec = document.getElementById('conv-dec');
+        var oct = document.getElementById('conv-oct');
+        var bin = document.getElementById('conv-bin');
+        var bitmap = document.getElementById('conv-bitmap');
+        var bitRadios = document.querySelectorAll('input[name="bits"]');
+
+        var currentBase = 10;
+        var currentBits = 16;
+
+        function getBits() {
+            var checked = document.querySelector('input[name="bits"]:checked');
+            return checked ? parseInt(checked.value) : 16;
+        }
+
+        function getMask() {
+            var bits = getBits();
+            if (bits >= 64) return null;
+            return (bits === 64) ? null : (1n << BigInt(bits)) - 1n;
+        }
+
+        function formatHex(val, bits) {
+            if (val < 0n && bits < 64) val = val & ((1n << BigInt(bits)) - 1n);
+            var s = val.toString(16).toUpperCase();
+            var nibbles = Math.ceil(bits / 4);
+            if (bits === 64) nibbles = Math.max(nibbles, s.length);
+            return s.padStart(nibbles, '0');
+        }
+
+        function formatBin(val, bits) {
+            if (val < 0n && bits < 64) val = val & ((1n << BigInt(bits)) - 1n);
+            var s = val.toString(2);
+            return s.padStart(bits, '0');
+        }
+
+        function renderBitmap(val, bits) {
+            if (val < 0n && bits < 64) val = val & ((1n << BigInt(bits)) - 1n);
+            var html = '';
+            for (var i = bits - 1; i >= 0; i--) {
+                var bit = (val >> BigInt(i)) & 1n;
+                var cls = bit ? 'bit-on' : 'bit-off';
+                html += '<span class="bit-cell ' + cls + '">' + bit + '</span>';
+                if (i > 0 && i % 4 === 0) html += '<span class="bit-gap"></span>';
+            }
+            bitmap.innerHTML = html;
+        }
+
+        function update() {
+            var raw = input.value.trim();
+            var bits = getBits();
+            var val = 0n;
+            var ok = false;
+
+            if (raw === '') {
+                hex.value = ''; dec.value = ''; oct.value = ''; bin.value = '';
+                bitmap.innerHTML = '';
+                return;
+            }
+
+            try {
+                raw = raw.replace(/\s/g, '');
+                if (raw.startsWith('0x') || raw.startsWith('0X')) {
+                    val = BigInt('0x' + raw.slice(2));
+                    ok = true;
+                } else if (raw.startsWith('0b') || raw.startsWith('0B')) {
+                    val = BigInt('0b' + raw.slice(2));
+                    ok = true;
+                } else if (raw.startsWith('0o') || raw.startsWith('0O')) {
+                    val = BigInt('0o' + raw.slice(2));
+                    ok = true;
+                } else if (/^[0-9]+$/.test(raw)) {
+                    val = BigInt(raw);
+                    ok = true;
+                } else if (/^[0-9a-fA-F]+$/.test(raw)) {
+                    val = BigInt('0x' + raw);
+                    ok = true;
+                }
+            } catch(e) { ok = false; }
+
+            if (!ok) {
+                hex.value = 'ERROR'; dec.value = 'ERROR'; oct.value = 'ERROR'; bin.value = 'ERROR';
+                bitmap.innerHTML = '<span class="conv-error">INVALID INPUT</span>';
+                return;
+            }
+
+            hex.value = formatHex(val, bits);
+            dec.value = val.toString(10);
+            oct.value = val.toString(8);
+            bin.value = formatBin(val, bits);
+            renderBitmap(val, bits);
+        }
+
+        input.addEventListener('input', update);
+        bitRadios.forEach(function(r) { r.addEventListener('change', update); });
+
+        // Copy buttons
+        document.querySelectorAll('.conv-copy').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var targetId = btn.getAttribute('data-target');
+                var target = document.getElementById(targetId);
+                if (!target || !target.value) return;
+                navigator.clipboard.writeText(target.value).then(function() {
+                    btn.textContent = 'OK';
+                    setTimeout(function() { btn.textContent = '■'; }, 600);
+                });
+            });
+        });
+
+        update();
+    })();
+    </script>
+
+    <!-- Theme toggle -->
+    <script>
+    (function() {
+        var html = document.documentElement;
+        var toggleBtn = document.getElementById('theme-toggle');
+        var transTimer = null;
+        function setTheme(mode) {
+            document.body.classList.add('theme-transitioning');
+            clearTimeout(transTimer);
+            transTimer = setTimeout(function() { document.body.classList.remove('theme-transitioning'); }, 200);
+            if (mode === 'light') {
+                html.classList.add('light'); html.classList.remove('dark');
+                if (toggleBtn) toggleBtn.textContent = '[DARK]';
+                try { localStorage.setItem('theme', 'light'); } catch(e) {}
+            } else {
+                html.classList.remove('light'); html.classList.add('dark');
+                if (toggleBtn) toggleBtn.textContent = '[LIGHT]';
+                try { localStorage.setItem('theme', 'dark'); } catch(e) {}
+            }
+        }
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                setTheme(html.classList.contains('light') ? 'dark' : 'light');
+            });
+        }
+        var current = html.classList.contains('light') ? 'light' : 'dark';
+        if (toggleBtn) toggleBtn.textContent = current === 'light' ? '[DARK]' : '[LIGHT]';
+    })();
+    </script>
+</body>
+</html>
