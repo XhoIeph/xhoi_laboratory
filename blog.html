@@ -67,24 +67,29 @@
     (function() {
         var container = document.getElementById('blog-posts');
         var heading = document.getElementById('blog-heading');
+        var allPosts = [];
 
         fetch('posts.json')
             .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
             .then(function(posts) {
                 if (!posts || posts.length === 0) { showEmpty(); return; }
-                posts.sort(function(a, b) { return b.date.localeCompare(a.date); });
-
-                // Check hash for single-post view
-                var hash = window.location.hash.replace('#', '');
-                if (hash) {
-                    var post = null;
-                    for (var i = 0; i < posts.length; i++) { if (posts[i].id === hash) { post = posts[i]; break; } }
-                    if (post) { renderSingle(post, posts); return; }
-                }
-
-                renderList(posts);
+                allPosts = posts.sort(function(a, b) { return b.date.localeCompare(a.date); });
+                renderCurrent();
             })
             .catch(function() { showEmpty(); });
+
+        // Re-render on hash change (user clicks a blog card)
+        window.addEventListener('hashchange', renderCurrent);
+
+        function renderCurrent() {
+            var hash = window.location.hash.replace('#', '');
+            if (hash) {
+                var post = null;
+                for (var i = 0; i < allPosts.length; i++) { if (allPosts[i].id === hash) { post = allPosts[i]; break; } }
+                if (post) { renderSingle(post, allPosts); return; }
+            }
+            renderList(allPosts);
+        }
 
         function showEmpty() {
             container.innerHTML = '<div class="blog-empty"><span class="blog-empty-icon">// 0x00</span><p>暂无文章 // NO_POSTS</p></div>';
