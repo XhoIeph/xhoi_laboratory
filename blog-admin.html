@@ -242,7 +242,7 @@
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                 var data = await resp.json();
                 postsSha = data.sha;
-                var content = atob(data.content);
+                var content = decodeUTF8(data.content);
                 posts = JSON.parse(content);
                 renderPostList();
             } catch(e) {
@@ -407,7 +407,7 @@
                 var content = JSON.stringify(posts, null, 2);
                 var body = {
                     message: '更新博客: ' + post.title,
-                    content: btoa(unescape(encodeURIComponent(content)))
+                    content: encodeUTF8(content)
                 };
                 if (postsSha) body.sha = postsSha;
 
@@ -481,6 +481,21 @@
             if (msg.indexOf('成功') !== -1) statusEl.style.color = 'var(--accent-teal)';
             else if (msg.indexOf('失败') !== -1 || msg.indexOf('错误') !== -1) statusEl.style.color = 'var(--accent)';
             else statusEl.style.color = 'var(--dim)';
+        }
+
+        function encodeUTF8(str) {
+            var encoder = new TextEncoder();
+            var bytes = encoder.encode(str);
+            var bin = '';
+            for (var i = 0; i < bytes.length; i++) { bin += String.fromCharCode(bytes[i]); }
+            return btoa(bin);
+        }
+
+        function decodeUTF8(b64) {
+            var bin = atob(b64);
+            var bytes = new Uint8Array(bin.length);
+            for (var i = 0; i < bin.length; i++) { bytes[i] = bin.charCodeAt(i); }
+            return new TextDecoder().decode(bytes);
         }
 
         function esc(s) {
