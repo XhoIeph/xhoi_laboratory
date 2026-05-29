@@ -60,12 +60,111 @@
 
     <!-- ========== CONTENT ========== -->
     <main class="blog-main">
-        <h2>博客</h2>
-        <h3>bokebokeboke</h3>
-        <p>我还不知道要写什么......</p>
+        <h2 id="blog-heading">博客</h2>
+        <div id="blog-posts" class="blog-list"></div>
     </main>
 
     <script src="js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Blog posts loader -->
+    <script>
+    (function() {
+        var container = document.getElementById('blog-posts');
+        var heading = document.getElementById('blog-heading');
+
+        fetch('posts.json')
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(function(posts) {
+                if (!posts || posts.length === 0) {
+                    showEmpty();
+                    return;
+                }
+                renderPosts(posts);
+            })
+            .catch(function(err) {
+                showEmpty();
+            });
+
+        function showEmpty() {
+            container.innerHTML = '<div class="blog-empty">' +
+                '<span class="blog-empty-icon">// 0x00</span>' +
+                '<p>暂无文章 // NO_POSTS</p>' +
+                '</div>';
+        }
+
+        function renderPosts(posts) {
+            // Sort by date descending
+            posts.sort(function(a, b) { return b.date.localeCompare(a.date); });
+
+            var html = '';
+            posts.forEach(function(post, idx) {
+                html += '<article class="blog-card" id="post-' + idx + '">' +
+                    '<div class="blog-card-header" data-idx="' + idx + '">' +
+                        '<h3 class="blog-card-title">' + esc(post.title) + '</h3>' +
+                        '<div class="blog-card-meta">' +
+                            '<span class="blog-date">' + esc(post.date) + '</span>' +
+                            renderTags(post.tags) +
+                        '</div>' +
+                        '<p class="blog-summary">' + esc(post.summary || '') + '</p>' +
+                        '<span class="blog-expand-hint">[ 点击展开 ]</span>' +
+                    '</div>' +
+                    '<div class="blog-card-body" id="body-' + idx + '" style="display:none">' +
+                        '<div class="blog-content">' + renderMarkdown(post.content || '') + '</div>' +
+                    '</div>' +
+                '</article>';
+            });
+
+            // Add a back-link to the index page
+            html += '<div class="blog-footer">' +
+                '<a href="index.html" class="back-link">[ HOME ]</a>' +
+                '<span style="color:var(--dim);font-size:0.5rem;margin-left:12px;">' + posts.length + ' post(s)</span>' +
+                '</div>';
+
+            container.innerHTML = html;
+
+            // Click-to-expand handlers
+            var headers = container.querySelectorAll('.blog-card-header');
+            headers.forEach(function(h) {
+                h.addEventListener('click', function() {
+                    var idx = h.getAttribute('data-idx');
+                    var body = document.getElementById('body-' + idx);
+                    if (body.style.display === 'none') {
+                        body.style.display = 'block';
+                        h.querySelector('.blog-expand-hint').textContent = '[ 收起 ]';
+                    } else {
+                        body.style.display = 'none';
+                        h.querySelector('.blog-expand-hint').textContent = '[ 点击展开 ]';
+                    }
+                });
+            });
+        }
+
+        function renderTags(tags) {
+            if (!tags || tags.length === 0) return '';
+            return '<span class="blog-tags">' +
+                tags.map(function(t) { return '<span class="blog-tag">' + esc(t) + '</span>'; }).join('') +
+                '</span>';
+        }
+
+        function renderMarkdown(md) {
+            if (typeof marked === 'undefined') return esc(md);
+            try {
+                return marked.parse(md);
+            } catch(e) {
+                return esc(md);
+            }
+        }
+
+        function esc(s) {
+            if (!s) return '';
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+    })();
+    </script>
 
     <!-- Theme toggle -->
     <script>
@@ -100,7 +199,6 @@
             });
         }
 
-        // Head script already set the class, just sync button text
         var current = html.classList.contains('light') ? 'light' : 'dark';
         if (toggleBtn) toggleBtn.textContent = current === 'light' ? '[DARK]' : '[LIGHT]';
     })();

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Admin // 生物酶实验室</title>
+    <script>
+    (function(){var t='light';try{t=localStorage.getItem('theme')||'light'}catch(e){}document.documentElement.className=t;})();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ========== HEADER ========== -->
+    <header>
+        <button class="menu" aria-expanded="false" aria-controls="main-nav">&#9776;</button>
+
+        <div class="header-left-group">
+            <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+                <svg class="header-logo-icon" viewBox="0 0 48 48" width="36" height="36">
+                    <polygon points="24,4 41.3,14 41.3,34 24,44 6.7,34 6.7,14" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7"/>
+                    <polygon points="24,12 36,24 24,36 12,24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.85"/>
+                    <polygon points="24,17 31,24 24,31 17,24" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
+                    <line x1="12" y1="12" x2="36" y2="36" stroke="currentColor" stroke-width="0.7" opacity="0.35"/>
+                    <line x1="36" y1="12" x2="12" y2="36" stroke="currentColor" stroke-width="0.7" opacity="0.35"/>
+                    <line x1="12" y1="24" x2="6.7" y2="24" stroke="currentColor" stroke-width="0.6" opacity="0.3"/>
+                    <line x1="36" y1="24" x2="41.3" y2="24" stroke="currentColor" stroke-width="0.6" opacity="0.3"/>
+                    <circle cx="24" cy="4" r="2.5" fill="currentColor" opacity="0.8"/>
+                    <circle cx="41.3" cy="14" r="2.5" fill="currentColor" opacity="0.8"/>
+                    <circle cx="41.3" cy="34" r="2.5" fill="currentColor" opacity="0.8"/>
+                    <circle cx="24" cy="44" r="2.5" fill="currentColor" opacity="0.8"/>
+                    <circle cx="6.7" cy="34" r="2.5" fill="currentColor" opacity="0.8"/>
+                    <circle cx="6.7" cy="14" r="2.5" fill="currentColor" opacity="0.8"/>
+                    <circle cx="24" cy="12" r="1.8" fill="currentColor" opacity="0.65"/>
+                    <circle cx="36" cy="24" r="1.8" fill="currentColor" opacity="0.65"/>
+                    <circle cx="24" cy="36" r="1.8" fill="currentColor" opacity="0.65"/>
+                    <circle cx="12" cy="24" r="1.8" fill="currentColor" opacity="0.65"/>
+                    <circle cx="24" cy="24" r="2" fill="currentColor" opacity="0.75"/>
+                </svg>
+                <div class="header-title-block">
+                    <span class="header-title-zh">生物酶实验室</span>
+                    <span class="header-title-en">ENZYME LABORATORY</span>
+                </div>
+            </a>
+            <span class="header-vdivider"></span>
+            <span class="info-line-sub" style="white-space:nowrap;">// ADMIN</span>
+        </div>
+
+        <ul id="main-nav">
+            <li><a href="index.html">[HOME]</a></li>
+            <li><a href="blog.html">[BLOG]</a></li>
+            <li>
+                <button id="theme-toggle">[LIGHT]</button>
+            </li>
+        </ul>
+    </header>
+
+    <!-- ========== PASSWORD GATE ========== -->
+    <div id="password-gate" class="password-gate">
+        <h2>管理员验证</h2>
+        <p style="color:var(--dim);font-size:0.7rem;">请输入密码以访问博客管理</p>
+        <input type="password" id="pw-input" placeholder="Password..." autofocus>
+        <p class="password-error" id="pw-error" style="display:none">// ERROR: 密码错误</p>
+    </div>
+
+    <!-- ========== TOKEN SETUP ========== -->
+    <div id="token-setup" style="display:none" class="password-gate">
+        <h2>GitHub Token 配置</h2>
+        <p style="color:var(--dim);font-size:0.65rem;max-width:420px;text-align:center;line-height:1.6;">
+            前往 GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)<br>
+            创建新 Token，勾选 <b>repo</b> 权限，将生成的 Token 粘贴到下方
+        </p>
+        <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx..." style="width:360px;max-width:90vw;">
+        <button id="token-save" class="serial-btn">[ SAVE TOKEN ]</button>
+        <p class="password-error" id="token-msg" style="display:none"></p>
+    </div>
+
+    <!-- ========== EDITOR ========== -->
+    <div id="editor" style="display:none" class="admin-layout">
+        <!-- Sidebar: post list -->
+        <aside class="admin-sidebar">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <span style="font-size:0.6rem;color:var(--dim);">POSTS</span>
+                <button id="btn-new" class="serial-btn serial-btn-sm">[ NEW ]</button>
+            </div>
+            <div id="post-list"></div>
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+                <span style="font-size:0.55rem;color:var(--dim);">DRAFTS</span>
+                <div id="draft-list" style="margin-top:4px;"></div>
+            </div>
+        </aside>
+
+        <!-- Main editor area -->
+        <div class="admin-main">
+            <!-- Form -->
+            <div class="admin-form">
+                <input type="text" id="edit-title" class="admin-field" placeholder="标题...">
+                <div style="display:flex;gap:8px;">
+                    <input type="date" id="edit-date" class="admin-field" style="flex:1;">
+                    <input type="text" id="edit-tags" class="admin-field" style="flex:2;" placeholder="标签 (逗号分隔)">
+                </div>
+                <input type="text" id="edit-summary" class="admin-field" placeholder="摘要...">
+                <textarea id="edit-content" class="admin-field admin-textarea" placeholder="Markdown 正文..."></textarea>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button id="btn-draft" class="serial-btn">[ SAVE DRAFT ]</button>
+                    <button id="btn-publish" class="serial-btn serial-btn-active">[ PUBLISH ]</button>
+                    <button id="btn-cancel" class="serial-btn">[ CANCEL ]</button>
+                    <span id="publish-status" style="font-size:0.55rem;color:var(--dim);"></span>
+                </div>
+                <input type="hidden" id="edit-id" value="">
+            </div>
+
+            <!-- Preview panel -->
+            <div class="admin-preview">
+                <div style="font-size:0.55rem;color:var(--dim);margin-bottom:8px;">// PREVIEW</div>
+                <div id="preview-content" class="blog-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+    (function() {
+        // ================================================================
+        // Password gate
+        // ================================================================
+        var PW_HASH = '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92';
+        var pwGate   = document.getElementById('password-gate');
+        var pwInput  = document.getElementById('pw-input');
+        var pwError  = document.getElementById('pw-error');
+        var tokenSetup = document.getElementById('token-setup');
+        var editor   = document.getElementById('editor');
+
+        // Check if already authenticated this session
+        if (sessionStorage.getItem('blog-auth') === '1') {
+            pwGate.style.display = 'none';
+            checkToken();
+        }
+
+        pwInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') verifyPassword();
+        });
+
+        async function verifyPassword() {
+            var input = pwInput.value.trim();
+            if (!input) return;
+
+            var hash = await sha256(input);
+            if (hash === PW_HASH) {
+                sessionStorage.setItem('blog-auth', '1');
+                pwGate.style.display = 'none';
+                pwError.style.display = 'none';
+                checkToken();
+            } else {
+                pwError.style.display = 'block';
+                pwInput.value = '';
+                pwInput.focus();
+            }
+        }
+
+        async function sha256(message) {
+            var msgBuffer = new TextEncoder().encode(message);
+            var hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            var hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+        }
+
+        // ================================================================
+        // Token management
+        // ================================================================
+        var GITHUB_TOKEN = '';
+        var REPO_OWNER = 'XhoIeph';
+        var REPO_NAME  = 'xhoi_laboratory';
+        var POSTS_PATH = 'posts.json';
+
+        function checkToken() {
+            var saved = localStorage.getItem('blog-ghtoken');
+            if (saved) {
+                GITHUB_TOKEN = saved;
+                tokenSetup.style.display = 'none';
+                initEditor();
+            } else {
+                tokenSetup.style.display = '';
+                pwGate.style.display = 'none';
+            }
+        }
+
+        document.getElementById('token-save').addEventListener('click', function() {
+            var token = document.getElementById('token-input').value.trim();
+            var msgEl = document.getElementById('token-msg');
+            if (!token) {
+                msgEl.style.display = 'block';
+                msgEl.textContent = '// ERROR: Token 不能为空';
+                return;
+            }
+            GITHUB_TOKEN = token;
+            localStorage.setItem('blog-ghtoken', token);
+            tokenSetup.style.display = 'none';
+            msgEl.style.display = 'none';
+            initEditor();
+        });
+
+        // ================================================================
+        // Editor state
+        // ================================================================
+        var posts = [];
+        var currentId = null;   // currently editing post id (null = new)
+        var postsSha = null;    // SHA of posts.json from GitHub
+
+        var postListEl   = document.getElementById('post-list');
+        var draftListEl  = document.getElementById('draft-list');
+        var editId       = document.getElementById('edit-id');
+        var editTitle    = document.getElementById('edit-title');
+        var editDate     = document.getElementById('edit-date');
+        var editTags     = document.getElementById('edit-tags');
+        var editSummary  = document.getElementById('edit-summary');
+        var editContent  = document.getElementById('edit-content');
+        var previewEl    = document.getElementById('preview-content');
+        var statusEl     = document.getElementById('publish-status');
+
+        async function initEditor() {
+            editor.style.display = '';
+            editDate.value = todayStr();
+
+            // Load posts from GitHub
+            await loadPosts();
+            // Load drafts from localStorage
+            loadDrafts();
+        }
+
+        async function loadPosts() {
+            try {
+                var url = 'https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME + '/contents/' + POSTS_PATH;
+                var resp = await fetch(url, {
+                    headers: { 'Authorization': 'token ' + GITHUB_TOKEN }
+                });
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                var data = await resp.json();
+                postsSha = data.sha;
+                var content = atob(data.content);
+                posts = JSON.parse(content);
+                renderPostList();
+            } catch(e) {
+                // Fallback: try loading locally
+                try {
+                    var localResp = await fetch(POSTS_PATH);
+                    posts = await localResp.json();
+                    renderPostList();
+                    setStatus('已加载本地 posts.json (无法连接 GitHub API)');
+                } catch(e2) {
+                    posts = [];
+                    renderPostList();
+                    setStatus('加载失败: ' + e.message);
+                }
+            }
+        }
+
+        function renderPostList() {
+            var html = '';
+            posts.forEach(function(p, i) {
+                html += '<div class="admin-post-item" data-idx="' + i + '">' +
+                    '<span style="font-weight:700;">' + esc(p.title) + '</span>' +
+                    '<span style="color:var(--dim);font-size:0.55rem;display:block;">' + esc(p.date) + '</span>' +
+                '</div>';
+            });
+            postListEl.innerHTML = html || '<span style="color:var(--dim);font-size:0.55rem;">(empty)</span>';
+
+            // Click to edit
+            postListEl.querySelectorAll('.admin-post-item').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    var idx = parseInt(el.getAttribute('data-idx'));
+                    editPost(posts[idx]);
+                    // Highlight active
+                    postListEl.querySelectorAll('.admin-post-item').forEach(function(e) { e.classList.remove('active'); });
+                    el.classList.add('active');
+                });
+            });
+        }
+
+        function loadDrafts() {
+            var drafts = [];
+            try { drafts = JSON.parse(localStorage.getItem('blog-drafts') || '[]'); } catch(e) {}
+
+            if (drafts.length === 0) {
+                draftListEl.innerHTML = '<span style="color:var(--dim);font-size:0.5rem;">(no drafts)</span>';
+                return;
+            }
+
+            var html = '';
+            drafts.forEach(function(d, i) {
+                html += '<div class="admin-post-item admin-draft-item" data-draft="' + i + '">' +
+                    '<span style="font-weight:700;">[DRAFT] ' + esc(d.title || 'Untitled') + '</span>' +
+                    '<button class="admin-draft-del" data-draft="' + i + '" style="float:right;background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.5rem;">x</button>' +
+                '</div>';
+            });
+            draftListEl.innerHTML = html;
+
+            // Click to load draft
+            draftListEl.querySelectorAll('.admin-draft-item').forEach(function(el) {
+                el.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('admin-draft-del')) return;
+                    var idx = parseInt(el.getAttribute('data-draft'));
+                    var drafts = JSON.parse(localStorage.getItem('blog-drafts') || '[]');
+                    loadIntoForm(drafts[idx]);
+                    setStatus('已加载草稿');
+                });
+            });
+
+            // Delete draft
+            draftListEl.querySelectorAll('.admin-draft-del').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    var idx = parseInt(btn.getAttribute('data-draft'));
+                    var drafts = JSON.parse(localStorage.getItem('blog-drafts') || '[]');
+                    drafts.splice(idx, 1);
+                    localStorage.setItem('blog-drafts', JSON.stringify(drafts));
+                    loadDrafts();
+                });
+            });
+        }
+
+        function editPost(post) {
+            currentId = post.id;
+            loadIntoForm(post);
+        }
+
+        function loadIntoForm(p) {
+            editId.value = p.id || '';
+            editTitle.value = p.title || '';
+            editDate.value = p.date || todayStr();
+            editTags.value = (p.tags || []).join(', ');
+            editSummary.value = p.summary || '';
+            editContent.value = p.content || '';
+            currentId = p.id || null;
+            updatePreview();
+        }
+
+        function todayStr() {
+            var d = new Date();
+            return d.getFullYear() + '-' +
+                (d.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                d.getDate().toString().padStart(2, '0');
+        }
+
+        // ================================================================
+        // Buttons
+        // ================================================================
+        document.getElementById('btn-new').addEventListener('click', function() {
+            currentId = null;
+            editId.value = '';
+            editTitle.value = '';
+            editDate.value = todayStr();
+            editTags.value = '';
+            editSummary.value = '';
+            editContent.value = '';
+            updatePreview();
+            postListEl.querySelectorAll('.admin-post-item').forEach(function(e) { e.classList.remove('active'); });
+        });
+
+        document.getElementById('btn-draft').addEventListener('click', function() {
+            var post = getFormData();
+            if (!post.title && !post.content) { setStatus('草稿为空，未保存'); return; }
+            var drafts = [];
+            try { drafts = JSON.parse(localStorage.getItem('blog-drafts') || '[]'); } catch(e) {}
+            // Replace existing draft for same id, or append
+            var found = false;
+            for (var i = 0; i < drafts.length; i++) {
+                if (drafts[i].id === post.id) { drafts[i] = post; found = true; break; }
+            }
+            if (!found) drafts.push(post);
+            localStorage.setItem('blog-drafts', JSON.stringify(drafts));
+            loadDrafts();
+            setStatus('草稿已保存');
+        });
+
+        document.getElementById('btn-cancel').addEventListener('click', function() {
+            document.getElementById('btn-new').click();
+        });
+
+        document.getElementById('btn-publish').addEventListener('click', async function() {
+            var post = getFormData();
+            if (!post.title) { setStatus('错误: 标题不能为空'); return; }
+
+            // Generate id if new
+            if (!post.id) {
+                post.id = post.date + '-' + post.title.replace(/[^a-zA-Z0-9一-鿿]/g, '-').substring(0, 40);
+            }
+
+            // Update or add
+            var found = false;
+            for (var i = 0; i < posts.length; i++) {
+                if (posts[i].id === post.id) { posts[i] = post; found = true; break; }
+            }
+            if (!found) posts.push(post);
+
+            // Sort by date descending
+            posts.sort(function(a, b) { return b.date.localeCompare(a.date); });
+
+            // Publish to GitHub
+            setStatus('正在发布...');
+            try {
+                var content = JSON.stringify(posts, null, 2);
+                var body = {
+                    message: '更新博客: ' + post.title,
+                    content: btoa(unescape(encodeURIComponent(content)))
+                };
+                if (postsSha) body.sha = postsSha;
+
+                var url = 'https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME + '/contents/' + POSTS_PATH;
+                var resp = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'token ' + GITHUB_TOKEN,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!resp.ok) {
+                    var errData = await resp.json();
+                    throw new Error(errData.message || 'HTTP ' + resp.status);
+                }
+
+                var result = await resp.json();
+                postsSha = result.content.sha;
+                renderPostList();
+                setStatus('发布成功！GitHub Pages 将在 1 分钟内更新');
+
+                // Clear matching draft
+                var drafts = [];
+                try { drafts = JSON.parse(localStorage.getItem('blog-drafts') || '[]'); } catch(e) {}
+                drafts = drafts.filter(function(d) { return d.id !== post.id; });
+                localStorage.setItem('blog-drafts', JSON.stringify(drafts));
+                loadDrafts();
+            } catch(e) {
+                setStatus('发布失败: ' + e.message);
+            }
+        });
+
+        // ================================================================
+        // Live preview
+        // ================================================================
+        editContent.addEventListener('input', updatePreview);
+        editTitle.addEventListener('input', updatePreview);
+
+        function updatePreview() {
+            var md = editContent.value || '';
+            var title = editTitle.value || '(无标题)';
+
+            var html = '<h2>' + esc(title) + '</h2>';
+            if (typeof marked !== 'undefined') {
+                try { html += marked.parse(md); } catch(e) { html += '<p>' + esc(md) + '</p>'; }
+            } else {
+                html += '<p>' + esc(md) + '</p>';
+            }
+            previewEl.innerHTML = html;
+        }
+
+        // ================================================================
+        // Helpers
+        // ================================================================
+        function getFormData() {
+            var tags = editTags.value.split(',').map(function(t) { return t.trim(); }).filter(Boolean);
+            return {
+                id: editId.value || null,
+                title: editTitle.value.trim(),
+                date: editDate.value || todayStr(),
+                tags: tags,
+                summary: editSummary.value.trim(),
+                content: editContent.value
+            };
+        }
+
+        function setStatus(msg) {
+            statusEl.textContent = msg;
+            if (msg.indexOf('成功') !== -1) statusEl.style.color = 'var(--accent-teal)';
+            else if (msg.indexOf('失败') !== -1 || msg.indexOf('错误') !== -1) statusEl.style.color = 'var(--accent)';
+            else statusEl.style.color = 'var(--dim)';
+        }
+
+        function esc(s) {
+            if (!s) return '';
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // ================================================================
+        // Delete post (via post list context)
+        // ================================================================
+        postListEl.addEventListener('contextmenu', function(e) {
+            var el = e.target.closest('.admin-post-item');
+            if (!el) return;
+            e.preventDefault();
+            var idx = parseInt(el.getAttribute('data-idx'));
+            var post = posts[idx];
+            if (!confirm('确认删除 "' + post.title + '" ?\n\n(删除后需点击 PUBLISH 才会生效)')) return;
+            posts.splice(idx, 1);
+            renderPostList();
+            setStatus('已标记删除: ' + post.title + ' (请点击 PUBLISH 提交)');
+        });
+    })();
+    </script>
+
+    <!-- Theme toggle -->
+    <script>
+    (function() {
+        var html = document.documentElement;
+        var toggleBtn = document.getElementById('theme-toggle');
+        var transTimer = null;
+        function setTheme(mode) {
+            document.body.classList.add('theme-transitioning');
+            clearTimeout(transTimer);
+            transTimer = setTimeout(function() { document.body.classList.remove('theme-transitioning'); }, 200);
+            if (mode === 'light') {
+                html.classList.add('light'); html.classList.remove('dark');
+                if (toggleBtn) toggleBtn.textContent = '[DARK]';
+                try { localStorage.setItem('theme', 'light'); } catch(e) {}
+            } else {
+                html.classList.remove('light'); html.classList.add('dark');
+                if (toggleBtn) toggleBtn.textContent = '[LIGHT]';
+                try { localStorage.setItem('theme', 'dark'); } catch(e) {}
+            }
+        }
+        if (toggleBtn) { toggleBtn.addEventListener('click', function() { setTheme(html.classList.contains('light')?'dark':'light'); }); }
+        var cur = html.classList.contains('light') ? 'light' : 'dark';
+        if (toggleBtn) toggleBtn.textContent = cur === 'light' ? '[DARK]' : '[LIGHT]';
+    })();
+    </script>
+</body>
+</html>
