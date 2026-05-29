@@ -68,7 +68,8 @@
         <h2>GitHub Token 配置</h2>
         <p style="color:var(--dim);font-size:0.65rem;max-width:420px;text-align:center;line-height:1.6;">
             前往 GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)<br>
-            创建新 Token，勾选 <b>repo</b> 权限，将生成的 Token 粘贴到下方
+            创建新 Token，勾选 <b>repo</b> 权限，将生成的 Token 粘贴到下方<br>
+            <span style="color:var(--accent-teal);">Token 将安全保存在浏览器中，下次无需重新输入</span>
         </p>
         <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx..." style="width:360px;max-width:90vw;">
         <div style="display:flex;gap:8px;">
@@ -182,7 +183,7 @@
         }
 
         // ================================================================
-        // Token management
+        // Token management (persisted in localStorage)
         // ================================================================
         var GITHUB_TOKEN = '';
         var REPO_OWNER = 'XhoIeph';
@@ -209,7 +210,11 @@
             var msgEl = document.getElementById('token-msg');
             if (!token) { msgEl.style.display = 'block'; msgEl.textContent = '// ERROR: Token 不能为空'; return; }
             GITHUB_TOKEN = token;
-            localStorage.setItem('blog-ghtoken', token);
+            try { localStorage.setItem('blog-ghtoken', token); } catch(e) {
+                msgEl.style.display = 'block';
+                msgEl.textContent = '// ERROR: 无法存储 Token，请检查浏览器隐私设置';
+                return;
+            }
             tokenSetup.style.display = 'none';
             msgEl.style.display = 'none';
             initEditor();
