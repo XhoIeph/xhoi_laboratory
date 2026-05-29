@@ -84,7 +84,10 @@
         <aside class="admin-sidebar">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
                 <span style="font-size:0.6rem;color:var(--dim);">POSTS</span>
-                <button id="btn-new" class="serial-btn serial-btn-sm">[ NEW ]</button>
+                <div>
+                    <button id="btn-reload" class="serial-btn serial-btn-sm" style="margin-right:4px;" title="重新加载">[ RELOAD ]</button>
+                    <button id="btn-new" class="serial-btn serial-btn-sm">[ NEW ]</button>
+                </div>
             </div>
             <div id="post-list"></div>
             <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
@@ -234,30 +237,52 @@
         }
 
         async function loadPosts() {
-            try {
-                var url = 'https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME + '/contents/' + POSTS_PATH;
-                var resp = await fetch(url, {
-                    headers: { 'Authorization': 'token ' + GITHUB_TOKEN }
-                });
-                if (!resp.ok) throw new Error('HTTP ' + resp.status);
-                var data = await resp.json();
-                postsSha = data.sha;
-                var content = decodeUTF8(data.content);
-                posts = JSON.parse(content);
-                renderPostList();
-            } catch(e) {
-                // Fallback: try loading locally
+            // Strategy: GitHub API → local fetch → embedded fallback
+            var loaded = false;
+
+            // 1) Try GitHub API
+            if (GITHUB_TOKEN) {
+                try {
+                    var url = 'https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME + '/contents/' + POSTS_PATH;
+                    var resp = await fetch(url, {
+                        headers: { 'Authorization': 'token ' + GITHUB_TOKEN }
+                    });
+                    if (resp.ok) {
+                        var data = await resp.json();
+                        postsSha = data.sha;
+                        var content = decodeUTF8(data.content);
+                        posts = JSON.parse(content);
+                        loaded = true;
+                        setStatus('已从 GitHub 加载 ' + posts.length + ' 篇文章');
+                    } else {
+                        setStatus('GitHub API 返回 ' + resp.status + '，尝试本地加载...');
+                    }
+                } catch(e) {
+                    setStatus('GitHub API 连接失败，尝试本地加载...');
+                }
+            } else {
+                setStatus('未配置 Token，从本地加载...');
+            }
+
+            // 2) Fallback: local fetch
+            if (!loaded) {
                 try {
                     var localResp = await fetch(POSTS_PATH);
-                    posts = await localResp.json();
-                    renderPostList();
-                    setStatus('已加载本地 posts.json (无法连接 GitHub API)');
-                } catch(e2) {
-                    posts = [];
-                    renderPostList();
-                    setStatus('加载失败: ' + e.message);
-                }
+                    if (localResp.ok) {
+                        posts = await localResp.json();
+                        loaded = true;
+                        setStatus('已从本地加载 ' + posts.length + ' 篇文章');
+                    }
+                } catch(e) {}
             }
+
+            // 3) Last resort: empty with hint
+            if (!loaded) {
+                posts = [];
+                setStatus('无法加载文章。请配置 GitHub Token 或通过本地服务器打开此页面。');
+            }
+
+            renderPostList();
         }
 
         function renderPostList() {
@@ -350,6 +375,11 @@
         // ================================================================
         // Buttons
         // ================================================================
+        document.getElementById('btn-reload').addEventListener('click', function() {
+            setStatus('重新加载中...');
+            loadPosts();
+        });
+
         document.getElementById('btn-new').addEventListener('click', function() {
             currentId = null;
             editId.value = '';
