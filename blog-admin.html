@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,7 +18,6 @@
     <!-- ========== HEADER ========== -->
     <header>
         <button class="menu" aria-expanded="false" aria-controls="main-nav">&#9776;</button>
-
         <div class="header-left-group">
             <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
                 <svg class="header-logo-icon" viewBox="0 0 48 48" width="36" height="36">
@@ -48,13 +48,10 @@
             <span class="header-vdivider"></span>
             <span class="info-line-sub" style="white-space:nowrap;">// ADMIN</span>
         </div>
-
         <ul id="main-nav">
             <li><a href="index.html">[HOME]</a></li>
             <li><a href="blog.html">[BLOG]</a></li>
-            <li>
-                <button id="theme-toggle">[LIGHT]</button>
-            </li>
+            <li><button id="theme-toggle">[LIGHT]</button></li>
         </ul>
     </header>
 
@@ -83,12 +80,11 @@
 
     <!-- ========== EDITOR ========== -->
     <div id="editor" style="display:none" class="admin-layout">
-        <!-- Sidebar: post list -->
         <aside class="admin-sidebar">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
                 <span style="font-size:0.6rem;color:var(--dim);">POSTS</span>
                 <div>
-                    <button id="btn-reload" class="serial-btn serial-btn-sm" style="margin-right:4px;" title="重新加载">[ RELOAD ]</button>
+                    <button id="btn-reload" class="serial-btn serial-btn-sm" style="margin-right:4px;">[ RELOAD ]</button>
                     <button id="btn-new" class="serial-btn serial-btn-sm">[ NEW ]</button>
                 </div>
             </div>
@@ -100,9 +96,7 @@
             <button id="btn-reset-token" class="serial-btn serial-btn-sm" style="margin-top:12px;width:100%;opacity:0.4;">[ RESET TOKEN ]</button>
         </aside>
 
-        <!-- Main editor area -->
         <div class="admin-main">
-            <!-- Form -->
             <div class="admin-form">
                 <input type="text" id="edit-title" class="admin-field" placeholder="标题...">
                 <div style="display:flex;gap:8px;">
@@ -110,7 +104,8 @@
                     <input type="text" id="edit-tags" class="admin-field" style="flex:2;" placeholder="标签 (逗号分隔)">
                 </div>
                 <input type="text" id="edit-summary" class="admin-field" placeholder="摘要...">
-                <textarea id="edit-content" class="admin-field admin-textarea" placeholder="Markdown 正文..."></textarea>
+                <!-- Quill editor -->
+                <div id="quill-editor" style="flex:1;min-height:300px;"></div>
                 <div style="display:flex;gap:8px;align-items:center;">
                     <button id="btn-draft" class="serial-btn">[ SAVE DRAFT ]</button>
                     <button id="btn-publish" class="serial-btn serial-btn-active">[ PUBLISH ]</button>
@@ -120,7 +115,6 @@
                 <input type="hidden" id="edit-id" value="">
             </div>
 
-            <!-- Preview panel -->
             <div class="admin-preview">
                 <div style="font-size:0.55rem;color:var(--dim);margin-bottom:8px;">// PREVIEW</div>
                 <div id="preview-content" class="blog-content"></div>
@@ -141,7 +135,7 @@
     </div>
 
     <script src="js/main.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 
     <script>
     (function() {
@@ -155,7 +149,6 @@
         var tokenSetup = document.getElementById('token-setup');
         var editor   = document.getElementById('editor');
 
-        // Check if already authenticated this session
         if (sessionStorage.getItem('blog-auth') === '1') {
             pwGate.style.display = 'none';
             checkToken();
@@ -168,7 +161,6 @@
         async function verifyPassword() {
             var input = pwInput.value.trim();
             if (!input) return;
-
             var hash = await sha256(input);
             if (hash === PW_HASH) {
                 sessionStorage.setItem('blog-auth', '1');
@@ -196,7 +188,6 @@
         var REPO_OWNER = 'XhoIeph';
         var REPO_NAME  = 'xhoi_laboratory';
         var POSTS_PATH = 'posts.json';
-
         var clearTokenBtn = document.getElementById('token-clear');
 
         function checkToken() {
@@ -216,11 +207,7 @@
         document.getElementById('token-save').addEventListener('click', function() {
             var token = document.getElementById('token-input').value.trim();
             var msgEl = document.getElementById('token-msg');
-            if (!token) {
-                msgEl.style.display = 'block';
-                msgEl.textContent = '// ERROR: Token 不能为空';
-                return;
-            }
+            if (!token) { msgEl.style.display = 'block'; msgEl.textContent = '// ERROR: Token 不能为空'; return; }
             GITHUB_TOKEN = token;
             localStorage.setItem('blog-ghtoken', token);
             tokenSetup.style.display = 'none';
@@ -230,30 +217,113 @@
 
         document.getElementById('btn-reset-token').addEventListener('click', function() {
             localStorage.removeItem('blog-ghtoken');
-            GITHUB_TOKEN = '';
-            postsSha = null;
-            tokenSetup.style.display = '';
-            editor.style.display = 'none';
+            GITHUB_TOKEN = ''; postsSha = null;
+            tokenSetup.style.display = ''; editor.style.display = 'none';
             document.getElementById('token-input').value = '';
             document.getElementById('token-msg').style.display = 'none';
         });
 
         clearTokenBtn.addEventListener('click', function() {
             localStorage.removeItem('blog-ghtoken');
-            GITHUB_TOKEN = '';
-            postsSha = null;
-            tokenSetup.style.display = '';
-            editor.style.display = 'none';
+            GITHUB_TOKEN = ''; postsSha = null;
+            tokenSetup.style.display = ''; editor.style.display = 'none';
             document.getElementById('token-input').value = '';
             document.getElementById('token-msg').style.display = 'none';
         });
 
         // ================================================================
+        // Quill editor
+        // ================================================================
+        var quill = new Quill('#quill-editor', {
+            theme: 'snow',
+            placeholder: '开始撰写...',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['blockquote', 'code-block'],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            }
+        });
+
+        // Image upload: paste or toolbar → upload to GitHub repo
+        quill.getModule('toolbar').addHandler('image', function() {
+            var input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.setAttribute('accept', 'image/*');
+            input.click();
+            input.onchange = function() {
+                var file = input.files[0];
+                if (!file) return;
+                uploadImage(file);
+            };
+        });
+
+        // Also handle paste of images
+        quill.root.addEventListener('paste', function(e) {
+            var items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    e.preventDefault();
+                    uploadImage(items[i].getAsFile());
+                    return;
+                }
+            }
+        });
+
+        async function uploadImage(file) {
+            setStatus('正在上传图片...');
+            try {
+                var ext = file.name.split('.').pop() || 'png';
+                var fname = 'blog-' + Date.now() + '.' + ext;
+                var path = 'image/blog/' + fname;
+
+                // Read as base64
+                var reader = new FileReader();
+                var base64 = await new Promise(function(resolve) {
+                    reader.onload = function() { resolve(reader.result.split(',')[1]); };
+                    reader.readAsDataURL(file);
+                });
+
+                // Upload to GitHub
+                var url = 'https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME + '/contents/' + path;
+                var resp = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'token ' + GITHUB_TOKEN,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: '上传博客图片: ' + fname,
+                        content: base64
+                    })
+                });
+
+                if (!resp.ok) {
+                    var errData = await resp.json();
+                    throw new Error(errData.message || 'HTTP ' + resp.status);
+                }
+
+                // Insert into editor
+                var range = quill.getSelection(true);
+                var imgUrl = 'https://raw.githubusercontent.com/' + REPO_OWNER + '/' + REPO_NAME + '/main/' + path;
+                quill.insertEmbed(range.index, 'image', imgUrl);
+                quill.setSelection(range.index + 1);
+                setStatus('图片已上传');
+            } catch(e) {
+                setStatus('图片上传失败: ' + e.message);
+            }
+        }
+
+        // ================================================================
         // Editor state
         // ================================================================
         var posts = [];
-        var currentId = null;   // currently editing post id (null = new)
-        var postsSha = null;    // SHA of posts.json from GitHub
+        var currentId = null;
+        var postsSha = null;
 
         var postListEl   = document.getElementById('post-list');
         var draftListEl  = document.getElementById('draft-list');
@@ -262,66 +332,39 @@
         var editDate     = document.getElementById('edit-date');
         var editTags     = document.getElementById('edit-tags');
         var editSummary  = document.getElementById('edit-summary');
-        var editContent  = document.getElementById('edit-content');
         var previewEl    = document.getElementById('preview-content');
         var statusEl     = document.getElementById('publish-status');
 
         async function initEditor() {
             editor.style.display = '';
             editDate.value = todayStr();
-
-            // Load posts from GitHub
             await loadPosts();
-            // Load drafts from localStorage
             loadDrafts();
         }
 
         async function loadPosts() {
-            // Strategy: GitHub API → local fetch → embedded fallback
             var loaded = false;
-
-            // 1) Try GitHub API
             if (GITHUB_TOKEN) {
                 try {
                     var url = 'https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME + '/contents/' + POSTS_PATH;
-                    var resp = await fetch(url, {
-                        headers: { 'Authorization': 'token ' + GITHUB_TOKEN }
-                    });
+                    var resp = await fetch(url, { headers: { 'Authorization': 'token ' + GITHUB_TOKEN } });
                     if (resp.ok) {
                         var data = await resp.json();
                         postsSha = data.sha;
-                        var content = decodeUTF8(data.content);
-                        posts = JSON.parse(content);
+                        posts = JSON.parse(decodeUTF8(data.content));
                         loaded = true;
                         setStatus('已从 GitHub 加载 ' + posts.length + ' 篇文章');
-                    } else {
-                        setStatus('GitHub API 返回 ' + resp.status + '，尝试本地加载...');
-                    }
-                } catch(e) {
-                    setStatus('GitHub API 连接失败，尝试本地加载...');
-                }
-            } else {
-                setStatus('未配置 Token，从本地加载...');
-            }
+                    } else { setStatus('GitHub API 返回 ' + resp.status + '，尝试本地加载...'); }
+                } catch(e) { setStatus('GitHub API 连接失败，尝试本地加载...'); }
+            } else { setStatus('未配置 Token，从本地加载...'); }
 
-            // 2) Fallback: local fetch
             if (!loaded) {
                 try {
                     var localResp = await fetch(POSTS_PATH);
-                    if (localResp.ok) {
-                        posts = await localResp.json();
-                        loaded = true;
-                        setStatus('已从本地加载 ' + posts.length + ' 篇文章');
-                    }
+                    if (localResp.ok) { posts = await localResp.json(); loaded = true; setStatus('已从本地加载 ' + posts.length + ' 篇文章'); }
                 } catch(e) {}
             }
-
-            // 3) Last resort: empty with hint
-            if (!loaded) {
-                posts = [];
-                setStatus('无法加载文章。请配置 GitHub Token 或通过本地服务器打开此页面。');
-            }
-
+            if (!loaded) { posts = []; setStatus('无法加载文章。请配置 GitHub Token 或通过本地服务器打开此页面。'); }
             renderPostList();
         }
 
@@ -334,13 +377,10 @@
                 '</div>';
             });
             postListEl.innerHTML = html || '<span style="color:var(--dim);font-size:0.55rem;">(empty)</span>';
-
-            // Click to edit
             postListEl.querySelectorAll('.admin-post-item').forEach(function(el) {
                 el.addEventListener('click', function() {
                     var idx = parseInt(el.getAttribute('data-idx'));
                     editPost(posts[idx]);
-                    // Highlight active
                     postListEl.querySelectorAll('.admin-post-item').forEach(function(e) { e.classList.remove('active'); });
                     el.classList.add('active');
                 });
@@ -350,12 +390,7 @@
         function loadDrafts() {
             var drafts = [];
             try { drafts = JSON.parse(localStorage.getItem('blog-drafts') || '[]'); } catch(e) {}
-
-            if (drafts.length === 0) {
-                draftListEl.innerHTML = '<span style="color:var(--dim);font-size:0.5rem;">(no drafts)</span>';
-                return;
-            }
-
+            if (drafts.length === 0) { draftListEl.innerHTML = '<span style="color:var(--dim);font-size:0.5rem;">(no drafts)</span>'; return; }
             var html = '';
             drafts.forEach(function(d, i) {
                 html += '<div class="admin-post-item admin-draft-item" data-draft="' + i + '">' +
@@ -364,19 +399,14 @@
                 '</div>';
             });
             draftListEl.innerHTML = html;
-
-            // Click to load draft
             draftListEl.querySelectorAll('.admin-draft-item').forEach(function(el) {
                 el.addEventListener('click', function(e) {
                     if (e.target.classList.contains('admin-draft-del')) return;
                     var idx = parseInt(el.getAttribute('data-draft'));
-                    var drafts = JSON.parse(localStorage.getItem('blog-drafts') || '[]');
-                    loadIntoForm(drafts[idx]);
+                    loadIntoForm(JSON.parse(localStorage.getItem('blog-drafts') || '[]')[idx]);
                     setStatus('已加载草稿');
                 });
             });
-
-            // Delete draft
             draftListEl.querySelectorAll('.admin-draft-del').forEach(function(btn) {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -389,10 +419,7 @@
             });
         }
 
-        function editPost(post) {
-            currentId = post.id;
-            loadIntoForm(post);
-        }
+        function editPost(post) { currentId = post.id; loadIntoForm(post); }
 
         function loadIntoForm(p) {
             editId.value = p.id || '';
@@ -400,34 +427,27 @@
             editDate.value = p.date || todayStr();
             editTags.value = (p.tags || []).join(', ');
             editSummary.value = p.summary || '';
-            editContent.value = p.content || '';
+            // Set Quill content (HTML)
+            quill.root.innerHTML = p.content || '';
             currentId = p.id || null;
             updatePreview();
         }
 
         function todayStr() {
             var d = new Date();
-            return d.getFullYear() + '-' +
-                (d.getMonth() + 1).toString().padStart(2, '0') + '-' +
-                d.getDate().toString().padStart(2, '0');
+            return d.getFullYear() + '-' + (d.getMonth()+1).toString().padStart(2,'0') + '-' + d.getDate().toString().padStart(2,'0');
         }
 
         // ================================================================
         // Buttons
         // ================================================================
-        document.getElementById('btn-reload').addEventListener('click', function() {
-            setStatus('重新加载中...');
-            loadPosts();
-        });
+        document.getElementById('btn-reload').addEventListener('click', function() { setStatus('重新加载中...'); loadPosts(); });
 
         document.getElementById('btn-new').addEventListener('click', function() {
             currentId = null;
-            editId.value = '';
-            editTitle.value = '';
-            editDate.value = todayStr();
-            editTags.value = '';
-            editSummary.value = '';
-            editContent.value = '';
+            editId.value = ''; editTitle.value = ''; editDate.value = todayStr();
+            editTags.value = ''; editSummary.value = '';
+            quill.root.innerHTML = '';
             updatePreview();
             postListEl.querySelectorAll('.admin-post-item').forEach(function(e) { e.classList.remove('active'); });
         });
@@ -437,37 +457,24 @@
             if (!post.title && !post.content) { setStatus('草稿为空，未保存'); return; }
             var drafts = [];
             try { drafts = JSON.parse(localStorage.getItem('blog-drafts') || '[]'); } catch(e) {}
-            // Replace existing draft for same id, or append
             var found = false;
-            for (var i = 0; i < drafts.length; i++) {
-                if (drafts[i].id === post.id) { drafts[i] = post; found = true; break; }
-            }
+            for (var i = 0; i < drafts.length; i++) { if (drafts[i].id === post.id) { drafts[i] = post; found = true; break; } }
             if (!found) drafts.push(post);
             localStorage.setItem('blog-drafts', JSON.stringify(drafts));
-            loadDrafts();
-            setStatus('草稿已保存');
+            loadDrafts(); setStatus('草稿已保存');
         });
 
-        document.getElementById('btn-cancel').addEventListener('click', function() {
-            document.getElementById('btn-new').click();
-        });
+        document.getElementById('btn-cancel').addEventListener('click', function() { document.getElementById('btn-new').click(); });
 
         document.getElementById('btn-publish').addEventListener('click', async function() {
             var post = getFormData();
             if (!post.title) { setStatus('错误: 标题不能为空'); return; }
-            if (!post.id) {
-                post.id = post.date + '-' + post.title.replace(/[^a-zA-Z0-9一-鿿]/g, '-').substring(0, 40);
-            }
-            // Upsert
+            if (!post.id) { post.id = post.date + '-' + post.title.replace(/[^a-zA-Z0-9一-鿿]/g, '-').substring(0, 40); }
             var found = false;
-            for (var i = 0; i < posts.length; i++) {
-                if (posts[i].id === post.id) { posts[i] = post; found = true; break; }
-            }
+            for (var i = 0; i < posts.length; i++) { if (posts[i].id === post.id) { posts[i] = post; found = true; break; } }
             if (!found) posts.push(post);
             posts.sort(function(a, b) { return b.date.localeCompare(a.date); });
-
             await doPublish('更新博客: ' + post.title);
-            // Clear matching draft
             var drafts = [];
             try { drafts = JSON.parse(localStorage.getItem('blog-drafts') || '[]'); } catch(e) {}
             drafts = drafts.filter(function(d) { return d.id !== post.id; });
@@ -479,55 +486,35 @@
             setStatus('正在发布...');
             try {
                 var content = JSON.stringify(posts, null, 2);
-                var body = {
-                    message: commitMsg,
-                    content: encodeUTF8(content)
-                };
+                var body = { message: commitMsg, content: encodeUTF8(content) };
                 if (postsSha) body.sha = postsSha;
-
                 var url = 'https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME + '/contents/' + POSTS_PATH;
                 var resp = await fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': 'token ' + GITHUB_TOKEN,
-                        'Content-Type': 'application/json'
-                    },
+                    method: 'PUT', headers: { 'Authorization': 'token ' + GITHUB_TOKEN, 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
                 });
-
                 if (!resp.ok) {
                     var errData = await resp.json();
                     var msg = errData.message || 'HTTP ' + resp.status;
                     if (resp.status === 401) msg = 'Token 无效或已过期，请重置 Token';
                     throw new Error(msg);
                 }
-
-                var result = await resp.json();
-                postsSha = result.content.sha;
+                postsSha = (await resp.json()).content.sha;
                 renderPostList();
                 setStatus('发布成功！GitHub Pages 将在 1 分钟内更新');
-            } catch(e) {
-                setStatus('发布失败: ' + e.message);
-            }
+            } catch(e) { setStatus('发布失败: ' + e.message); }
         }
 
         // ================================================================
         // Live preview
         // ================================================================
-        editContent.addEventListener('input', updatePreview);
+        quill.on('text-change', updatePreview);
         editTitle.addEventListener('input', updatePreview);
 
         function updatePreview() {
-            var md = editContent.value || '';
+            var html = quill.root.innerHTML || '';
             var title = editTitle.value || '(无标题)';
-
-            var html = '<h2>' + esc(title) + '</h2>';
-            if (typeof marked !== 'undefined') {
-                try { html += marked.parse(md); } catch(e) { html += '<p>' + esc(md) + '</p>'; }
-            } else {
-                html += '<p>' + esc(md) + '</p>';
-            }
-            previewEl.innerHTML = html;
+            previewEl.innerHTML = '<h2>' + esc(title) + '</h2>' + html;
         }
 
         // ================================================================
@@ -541,7 +528,7 @@
                 date: editDate.value || todayStr(),
                 tags: tags,
                 summary: editSummary.value.trim(),
-                content: editContent.value
+                content: quill.root.innerHTML
             };
         }
 
@@ -553,47 +540,36 @@
         }
 
         function encodeUTF8(str) {
-            var encoder = new TextEncoder();
-            var bytes = encoder.encode(str);
-            var bin = '';
-            for (var i = 0; i < bytes.length; i++) { bin += String.fromCharCode(bytes[i]); }
+            var bytes = new TextEncoder().encode(str);
+            var bin = ''; for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
             return btoa(bin);
         }
 
         function decodeUTF8(b64) {
             var bin = atob(b64);
             var bytes = new Uint8Array(bin.length);
-            for (var i = 0; i < bin.length; i++) { bytes[i] = bin.charCodeAt(i); }
+            for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
             return new TextDecoder().decode(bytes);
         }
 
         function esc(s) {
             if (!s) return '';
-            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
         }
 
         // ================================================================
-        // Delete post (right-click → custom confirm → auto-publish)
+        // Delete post
         // ================================================================
         var deleteTarget = null;
-
         function showConfirm(title, onConfirm) {
-            deleteTarget = { title: title, cb: onConfirm };
+            deleteTarget = { cb: onConfirm };
             document.getElementById('confirm-title').textContent = title;
             document.getElementById('confirm-overlay').style.display = 'flex';
         }
-
-        document.getElementById('confirm-cancel').addEventListener('click', function() {
-            document.getElementById('confirm-overlay').style.display = 'none';
-            deleteTarget = null;
-        });
-
+        document.getElementById('confirm-cancel').addEventListener('click', function() { document.getElementById('confirm-overlay').style.display = 'none'; deleteTarget = null; });
         document.getElementById('confirm-ok').addEventListener('click', async function() {
             document.getElementById('confirm-overlay').style.display = 'none';
-            if (deleteTarget) {
-                await deleteTarget.cb();
-                deleteTarget = null;
-            }
+            if (deleteTarget) { await deleteTarget.cb(); deleteTarget = null; }
         });
 
         postListEl.addEventListener('contextmenu', function(e) {
@@ -614,22 +590,13 @@
     <!-- Theme toggle -->
     <script>
     (function() {
-        var html = document.documentElement;
-        var toggleBtn = document.getElementById('theme-toggle');
-        var transTimer = null;
+        var html = document.documentElement, toggleBtn = document.getElementById('theme-toggle'), transTimer = null;
         function setTheme(mode) {
             document.body.classList.add('theme-transitioning');
             clearTimeout(transTimer);
             transTimer = setTimeout(function() { document.body.classList.remove('theme-transitioning'); }, 200);
-            if (mode === 'light') {
-                html.classList.add('light'); html.classList.remove('dark');
-                if (toggleBtn) toggleBtn.textContent = '[DARK]';
-                try { localStorage.setItem('theme', 'light'); } catch(e) {}
-            } else {
-                html.classList.remove('light'); html.classList.add('dark');
-                if (toggleBtn) toggleBtn.textContent = '[LIGHT]';
-                try { localStorage.setItem('theme', 'dark'); } catch(e) {}
-            }
+            if (mode === 'light') { html.classList.add('light'); html.classList.remove('dark'); if (toggleBtn) toggleBtn.textContent = '[DARK]'; try { localStorage.setItem('theme', 'light'); } catch(e) {} }
+            else { html.classList.remove('light'); html.classList.add('dark'); if (toggleBtn) toggleBtn.textContent = '[LIGHT]'; try { localStorage.setItem('theme', 'dark'); } catch(e) {} }
         }
         if (toggleBtn) { toggleBtn.addEventListener('click', function() { setTheme(html.classList.contains('light')?'dark':'light'); }); }
         var cur = html.classList.contains('light') ? 'light' : 'dark';

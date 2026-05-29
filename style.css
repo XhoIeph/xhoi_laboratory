@@ -1259,11 +1259,11 @@ header.scrolled {
 .blog-main h3 { font-size: 1rem; font-weight: 400; color: var(--dim); margin-bottom: 0.5rem; }
 .blog-main p  { font-size: 0.875rem; line-height: 1.8; color: var(--dim); }
 
-/* Blog post cards */
+/* Blog post list */
 .blog-list { margin-top: 1.5rem; }
-.blog-card { border: 1px solid var(--border); margin-bottom: -1px; }
-.blog-card-header { padding: 1.5rem; cursor: pointer; transition: background-color 80ms ease; }
-.blog-card-header:hover { background: var(--surface); }
+.blog-card { border: 1px solid var(--border); margin-bottom: -1px; transition: background-color 80ms ease; }
+.blog-card:hover { background: var(--surface); }
+.blog-card-link { display: block; padding: 1.5rem; text-decoration: none; color: inherit; }
 .blog-card-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; }
 .blog-card-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
 .blog-date { font-size: 0.6rem; color: var(--dim); letter-spacing: 0.04em; }
@@ -1271,8 +1271,16 @@ header.scrolled {
 .blog-tag { display: inline-block; border: 1px solid var(--border); padding: 1px 8px; font-size: 0.5rem; color: var(--dim); letter-spacing: 0.03em; }
 .blog-summary { font-size: 0.75rem; color: var(--dim); line-height: 1.5; margin-bottom: 8px; }
 .blog-expand-hint { font-size: 0.5rem; color: var(--accent); letter-spacing: 0.06em; }
-.blog-card-body { padding: 0 1.5rem 1.5rem; border-top: 1px solid var(--border); }
-.blog-content { font-size: 0.85rem; line-height: 1.9; color: var(--text); }
+
+/* Single post view */
+.blog-post-full { max-width: 100%; }
+.blog-post-title { font-family: 'Zpix','PingFang SC','Microsoft YaHei',sans-serif; font-size: 1.6rem; margin-bottom: 0.5rem; }
+.blog-other-link { display: block; padding: 6px 0; font-size: 0.7rem; color: var(--accent); border-bottom: 1px solid var(--border); opacity: 0.4; }
+.blog-other-link:hover { opacity: 1; }
+
+/* Blog content (HTML from Quill / Markdown) */
+.blog-content { font-size: 0.85rem; line-height: 1.9; color: var(--text); word-break: break-word; }
+.blog-content h1 { font-family: 'Zpix','PingFang SC','Microsoft YaHei',sans-serif; font-size: 1.5rem; margin: 1.5rem 0 0.8rem; }
 .blog-content h2 { font-family: 'Zpix','PingFang SC','Microsoft YaHei',sans-serif; font-size: 1.3rem; margin: 1.2rem 0 0.6rem; }
 .blog-content h3 { font-family: 'Zpix','PingFang SC','Microsoft YaHei',sans-serif; font-size: 1rem; margin: 1rem 0 0.4rem; color: var(--text); }
 .blog-content p { font-size: 0.85rem; line-height: 1.9; margin-bottom: 0.8rem; color: var(--text); }
@@ -1286,6 +1294,7 @@ header.scrolled {
 .blog-content strong { font-weight: 700; }
 .blog-content em { font-style: italic; }
 .blog-content hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; opacity: 0.3; }
+.blog-content img { max-width: 100%; height: auto; border: 1px solid var(--border); }
 
 .blog-empty { text-align: center; padding: 4rem 1rem; }
 .blog-empty-icon { font-size: 0.55rem; color: var(--dim); letter-spacing: 0.06em; display: block; margin-bottom: 1rem; }
@@ -1323,6 +1332,29 @@ header.scrolled {
 }
 .password-gate input:focus { border-color: var(--accent); }
 .password-error { color: var(--accent); font-size: 0.6rem; letter-spacing: 0.04em; }
+
+/* Quill editor theme overrides */
+.ql-toolbar.ql-snow {
+  border-color: var(--border) !important;
+  background: var(--surface);
+  font-family: 'JetBrains Mono',monospace;
+}
+.ql-container.ql-snow {
+  border-color: var(--border) !important;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono','Courier New',monospace;
+  font-size: 0.8rem;
+}
+.ql-editor.ql-blank::before { color: var(--dim) !important; font-style: normal !important; }
+.ql-snow .ql-stroke { stroke: var(--text) !important; }
+.ql-snow .ql-fill { fill: var(--text) !important; }
+.ql-snow .ql-picker { color: var(--text) !important; }
+.ql-snow .ql-picker-options { background: var(--bg) !important; border-color: var(--border) !important; }
+.ql-snow.ql-toolbar button:hover .ql-stroke, .ql-snow .ql-picker-label:hover .ql-stroke { stroke: var(--accent) !important; }
+.ql-snow.ql-toolbar button.ql-active .ql-stroke { stroke: var(--accent) !important; }
+.ql-snow .ql-picker-label:hover, .ql-snow .ql-picker-item:hover { color: var(--accent) !important; }
+.ql-editor { line-height: 1.8 !important; }
 
 /* Confirm overlay */
 .confirm-overlay {
