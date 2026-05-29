@@ -74,7 +74,10 @@
             创建新 Token，勾选 <b>repo</b> 权限，将生成的 Token 粘贴到下方
         </p>
         <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx..." style="width:360px;max-width:90vw;">
-        <button id="token-save" class="serial-btn">[ SAVE TOKEN ]</button>
+        <div style="display:flex;gap:8px;">
+            <button id="token-save" class="serial-btn">[ SAVE TOKEN ]</button>
+            <button id="token-clear" class="serial-btn" style="display:none;">[ CLEAR TOKEN ]</button>
+        </div>
         <p class="password-error" id="token-msg" style="display:none"></p>
     </div>
 
@@ -94,6 +97,7 @@
                 <span style="font-size:0.55rem;color:var(--dim);">DRAFTS</span>
                 <div id="draft-list" style="margin-top:4px;"></div>
             </div>
+            <button id="btn-reset-token" class="serial-btn serial-btn-sm" style="margin-top:12px;width:100%;opacity:0.4;">[ RESET TOKEN ]</button>
         </aside>
 
         <!-- Main editor area -->
@@ -120,6 +124,18 @@
             <div class="admin-preview">
                 <div style="font-size:0.55rem;color:var(--dim);margin-bottom:8px;">// PREVIEW</div>
                 <div id="preview-content" class="blog-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== CONFIRM OVERLAY ========== -->
+    <div id="confirm-overlay" class="confirm-overlay" style="display:none;">
+        <div class="confirm-box">
+            <p style="font-size:0.8rem;margin-bottom:16px;">// CONFIRM</p>
+            <p id="confirm-title" style="font-size:0.7rem;margin-bottom:20px;color:var(--text);"></p>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button id="confirm-cancel" class="serial-btn serial-btn-sm">[ CANCEL ]</button>
+                <button id="confirm-ok" class="serial-btn serial-btn-sm serial-btn-active">[ DELETE ]</button>
             </div>
         </div>
     </div>
@@ -181,14 +197,18 @@
         var REPO_NAME  = 'xhoi_laboratory';
         var POSTS_PATH = 'posts.json';
 
+        var clearTokenBtn = document.getElementById('token-clear');
+
         function checkToken() {
             var saved = localStorage.getItem('blog-ghtoken');
             if (saved) {
                 GITHUB_TOKEN = saved;
                 tokenSetup.style.display = 'none';
+                if (clearTokenBtn) clearTokenBtn.style.display = '';
                 initEditor();
             } else {
                 tokenSetup.style.display = '';
+                if (clearTokenBtn) clearTokenBtn.style.display = 'none';
                 pwGate.style.display = 'none';
             }
         }
@@ -206,6 +226,26 @@
             tokenSetup.style.display = 'none';
             msgEl.style.display = 'none';
             initEditor();
+        });
+
+        document.getElementById('btn-reset-token').addEventListener('click', function() {
+            localStorage.removeItem('blog-ghtoken');
+            GITHUB_TOKEN = '';
+            postsSha = null;
+            tokenSetup.style.display = '';
+            editor.style.display = 'none';
+            document.getElementById('token-input').value = '';
+            document.getElementById('token-msg').style.display = 'none';
+        });
+
+        clearTokenBtn.addEventListener('click', function() {
+            localStorage.removeItem('blog-ghtoken');
+            GITHUB_TOKEN = '';
+            postsSha = null;
+            tokenSetup.style.display = '';
+            editor.style.display = 'none';
+            document.getElementById('token-input').value = '';
+            document.getElementById('token-msg').style.display = 'none';
         });
 
         // ================================================================
@@ -415,28 +455,32 @@
         document.getElementById('btn-publish').addEventListener('click', async function() {
             var post = getFormData();
             if (!post.title) { setStatus('错误: 标题不能为空'); return; }
-
-            // Generate id if new
             if (!post.id) {
                 post.id = post.date + '-' + post.title.replace(/[^a-zA-Z0-9一-鿿]/g, '-').substring(0, 40);
             }
-
-            // Update or add
+            // Upsert
             var found = false;
             for (var i = 0; i < posts.length; i++) {
                 if (posts[i].id === post.id) { posts[i] = post; found = true; break; }
             }
             if (!found) posts.push(post);
-
-            // Sort by date descending
             posts.sort(function(a, b) { return b.date.localeCompare(a.date); });
 
-            // Publish to GitHub
+            await doPublish('更新博客: ' + post.title);
+            // Clear matching draft
+            var drafts = [];
+            try { drafts = JSON.parse(localStorage.getItem('blog-drafts') || '[]'); } catch(e) {}
+            drafts = drafts.filter(function(d) { return d.id !== post.id; });
+            localStorage.setItem('blog-drafts', JSON.stringify(drafts));
+            loadDrafts();
+        });
+
+        async function doPublish(commitMsg) {
             setStatus('正在发布...');
             try {
                 var content = JSON.stringify(posts, null, 2);
                 var body = {
-                    message: '更新博客: ' + post.title,
+                    message: commitMsg,
                     content: encodeUTF8(content)
                 };
                 if (postsSha) body.sha = postsSha;
@@ -453,24 +497,19 @@
 
                 if (!resp.ok) {
                     var errData = await resp.json();
-                    throw new Error(errData.message || 'HTTP ' + resp.status);
+                    var msg = errData.message || 'HTTP ' + resp.status;
+                    if (resp.status === 401) msg = 'Token 无效或已过期，请重置 Token';
+                    throw new Error(msg);
                 }
 
                 var result = await resp.json();
                 postsSha = result.content.sha;
                 renderPostList();
                 setStatus('发布成功！GitHub Pages 将在 1 分钟内更新');
-
-                // Clear matching draft
-                var drafts = [];
-                try { drafts = JSON.parse(localStorage.getItem('blog-drafts') || '[]'); } catch(e) {}
-                drafts = drafts.filter(function(d) { return d.id !== post.id; });
-                localStorage.setItem('blog-drafts', JSON.stringify(drafts));
-                loadDrafts();
             } catch(e) {
                 setStatus('发布失败: ' + e.message);
             }
-        });
+        }
 
         // ================================================================
         // Live preview
@@ -534,18 +573,40 @@
         }
 
         // ================================================================
-        // Delete post (via post list context)
+        // Delete post (right-click → custom confirm → auto-publish)
         // ================================================================
+        var deleteTarget = null;
+
+        function showConfirm(title, onConfirm) {
+            deleteTarget = { title: title, cb: onConfirm };
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-overlay').style.display = 'flex';
+        }
+
+        document.getElementById('confirm-cancel').addEventListener('click', function() {
+            document.getElementById('confirm-overlay').style.display = 'none';
+            deleteTarget = null;
+        });
+
+        document.getElementById('confirm-ok').addEventListener('click', async function() {
+            document.getElementById('confirm-overlay').style.display = 'none';
+            if (deleteTarget) {
+                await deleteTarget.cb();
+                deleteTarget = null;
+            }
+        });
+
         postListEl.addEventListener('contextmenu', function(e) {
             var el = e.target.closest('.admin-post-item');
             if (!el) return;
             e.preventDefault();
             var idx = parseInt(el.getAttribute('data-idx'));
             var post = posts[idx];
-            if (!confirm('确认删除 "' + post.title + '" ?\n\n(删除后需点击 PUBLISH 才会生效)')) return;
-            posts.splice(idx, 1);
-            renderPostList();
-            setStatus('已标记删除: ' + post.title + ' (请点击 PUBLISH 提交)');
+            showConfirm('确认删除 "' + post.title + '" ？', async function() {
+                posts.splice(idx, 1);
+                renderPostList();
+                await doPublish('删除: ' + post.title);
+            });
         });
     })();
     </script>

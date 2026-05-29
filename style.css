@@ -1324,6 +1324,16 @@ header.scrolled {
 .password-gate input:focus { border-color: var(--accent); }
 .password-error { color: var(--accent); font-size: 0.6rem; letter-spacing: 0.04em; }
 
+/* Confirm overlay */
+.confirm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+}
+.confirm-box {
+  background: var(--bg); border: 1px solid var(--border);
+  padding: 2rem; max-width: 380px; width: 90vw;
+}
+
 /* Admin layout */
 .admin-layout { display: flex; min-height: calc(100vh - 72px); padding-top: 72px; z-index: 1; position: relative; }
 .admin-sidebar { width: 240px; border-right: 1px solid var(--border); padding: 1rem; overflow-y: auto; flex-shrink: 0; }
