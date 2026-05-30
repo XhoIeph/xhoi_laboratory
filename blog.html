@@ -83,6 +83,7 @@
 
         function renderCurrent() {
             var hash = window.location.hash.replace('#', '');
+            try { hash = decodeURIComponent(hash); } catch(e) {}
             if (hash) {
                 var post = null;
                 for (var i = 0; i < allPosts.length; i++) { if (allPosts[i].id === hash) { post = allPosts[i]; break; } }

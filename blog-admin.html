@@ -474,7 +474,7 @@
         document.getElementById('btn-publish').addEventListener('click', async function() {
             var post = getFormData();
             if (!post.title) { setStatus('错误: 标题不能为空'); return; }
-            if (!post.id) { post.id = post.date + '-' + post.title.replace(/[^a-zA-Z0-9一-鿿]/g, '-').substring(0, 40); }
+            if (!post.id) { post.id = post.date + '-' + post.title.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').substring(0, 40); }
             var found = false;
             for (var i = 0; i < posts.length; i++) { if (posts[i].id === post.id) { posts[i] = post; found = true; break; } }
             if (!found) posts.push(post);
