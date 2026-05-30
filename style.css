@@ -1296,6 +1296,22 @@ header.scrolled {
 .blog-content hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; opacity: 0.3; }
 .blog-content img { max-width: 100%; height: auto; border: 1px solid var(--border); }
 
+/* Quill code block rendering on public blog */
+.blog-content .ql-code-block-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  margin: 0.8rem 0;
+  overflow-x: auto;
+  line-height: 1.6;
+}
+.blog-content .ql-code-block {
+  font-family: 'JetBrains Mono','Courier New',monospace;
+  font-size: 0.7rem;
+  white-space: pre;
+  color: var(--text);
+}
+
 .blog-empty { text-align: center; padding: 4rem 1rem; }
 .blog-empty-icon { font-size: 0.55rem; color: var(--dim); letter-spacing: 0.06em; display: block; margin-bottom: 1rem; }
 .blog-empty p { font-size: 0.75rem; color: var(--dim); }
