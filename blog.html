@@ -99,8 +99,8 @@
             heading.textContent = '博客';
             var html = '';
             posts.forEach(function(post) {
-                html += '<article class="blog-card">' +
-                    '<a href="blog.html#' + escAttr(post.id) + '" class="blog-card-link">' +
+                html += '<article class="blog-card" data-post-id="' + escAttr(post.id) + '" style="cursor:pointer;">' +
+                    '<div class="blog-card-link">' +
                         '<h3 class="blog-card-title">' + esc(post.title) + '</h3>' +
                         '<div class="blog-card-meta">' +
                             '<span class="blog-date">' + esc(post.date) + '</span>' +
@@ -108,11 +108,19 @@
                         '</div>' +
                         '<p class="blog-summary">' + esc(post.summary || '') + '</p>' +
                         '<span class="blog-expand-hint">[ 阅读 ]</span>' +
-                    '</a>' +
+                    '</div>' +
                 '</article>';
             });
             html += '<div class="blog-footer"><a href="index.html" class="back-link">[ HOME ]</a><span style="color:var(--dim);font-size:0.5rem;margin-left:12px;">' + posts.length + ' post(s)</span></div>';
             container.innerHTML = html;
+
+            // Click handler on entire card — more reliable than <a> tags
+            container.querySelectorAll('.blog-card').forEach(function(card) {
+                card.addEventListener('click', function() {
+                    var id = card.getAttribute('data-post-id');
+                    if (id) window.location.hash = id;
+                });
+            });
         }
 
         function renderSingle(post, allPosts) {
@@ -132,13 +140,21 @@
                 html += '<div class="blog-footer" style="margin-top:3rem;">' +
                     '<span style="font-size:0.6rem;color:var(--dim);">其他文章:</span>';
                 others.forEach(function(p) {
-                    html += '<a href="blog.html#' + escAttr(p.id) + '" class="blog-other-link">' + esc(p.title) + '</a>';
+                    html += '<span class="blog-other-link" data-post-id="' + escAttr(p.id) + '" style="cursor:pointer;">' + esc(p.title) + '</span>';
                 });
                 html += '</div>';
             }
 
             container.innerHTML = html;
             document.title = post.title + ' // 生物酶实验室';
+
+            // Wire up other-post links
+            container.querySelectorAll('.blog-other-link').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    var id = el.getAttribute('data-post-id');
+                    if (id) window.location.hash = id;
+                });
+            });
         }
 
         function renderTags(tags) {

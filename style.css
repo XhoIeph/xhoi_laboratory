@@ -1275,7 +1275,7 @@ header.scrolled {
 /* Single post view */
 .blog-post-full { max-width: 100%; }
 .blog-post-title { font-family: 'Zpix','PingFang SC','Microsoft YaHei',sans-serif; font-size: 1.6rem; margin-bottom: 0.5rem; }
-.blog-other-link { display: block; padding: 6px 0; font-size: 0.7rem; color: var(--accent); border-bottom: 1px solid var(--border); opacity: 0.4; }
+.blog-other-link { display: block; padding: 6px 0; font-size: 0.7rem; color: var(--accent); border-bottom: 1px solid var(--border); opacity: 0.4; cursor: pointer; }
 .blog-other-link:hover { opacity: 1; }
 
 /* Blog content (HTML from Quill / Markdown) */
